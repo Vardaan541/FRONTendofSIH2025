@@ -93,7 +93,7 @@ export default function CreatePost() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="What's on your mind? Share career insights, experiences, or advice for students..."
-                className="w-full h-48 resize-none border-none outline-none text-gray-900 placeholder-gray-500"
+                className="textarea-enhanced h-48"
                 disabled={isLoading}
               />
             </div>

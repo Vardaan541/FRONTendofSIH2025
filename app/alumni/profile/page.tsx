@@ -129,7 +129,7 @@ export default function AlumniProfile() {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -140,7 +140,7 @@ export default function AlumniProfile() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -151,7 +151,7 @@ export default function AlumniProfile() {
                       type="text"
                       value={formData.currentPosition}
                       onChange={(e) => setFormData({ ...formData, currentPosition: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -162,7 +162,7 @@ export default function AlumniProfile() {
                       type="text"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -173,7 +173,7 @@ export default function AlumniProfile() {
                       type="text"
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -184,7 +184,7 @@ export default function AlumniProfile() {
                       type="number"
                       value={formData.graduationYear}
                       onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                 </div>
@@ -196,7 +196,7 @@ export default function AlumniProfile() {
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="textarea-enhanced"
                     placeholder="Tell us about your professional journey, expertise, and how you can help students..."
                   />
                 </div>

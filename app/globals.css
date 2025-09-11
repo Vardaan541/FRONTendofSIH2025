@@ -31,3 +31,43 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Enhanced Input Styles for Better Visibility */
+@layer components {
+  .input-enhanced {
+    @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg 
+           bg-white text-gray-900 placeholder-gray-500
+           focus:outline-none focus:ring-4 focus:ring-blue-100 
+           focus:border-blue-500 transition-all duration-200
+           shadow-sm hover:shadow-md hover:border-gray-400;
+  }
+  
+  .input-enhanced:focus {
+    @apply shadow-lg;
+  }
+  
+  .textarea-enhanced {
+    @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg 
+           bg-white text-gray-900 placeholder-gray-500
+           focus:outline-none focus:ring-4 focus:ring-blue-100 
+           focus:border-blue-500 transition-all duration-200
+           shadow-sm hover:shadow-md hover:border-gray-400
+           resize-none;
+  }
+  
+  .textarea-enhanced:focus {
+    @apply shadow-lg;
+  }
+  
+  .select-enhanced {
+    @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg 
+           bg-white text-gray-900
+           focus:outline-none focus:ring-4 focus:ring-blue-100 
+           focus:border-blue-500 transition-all duration-200
+           shadow-sm hover:shadow-md hover:border-gray-400;
+  }
+  
+  .select-enhanced:focus {
+    @apply shadow-lg;
+  }
+}

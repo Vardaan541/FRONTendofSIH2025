@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { GraduationCap, User, Shield, ArrowRight } from 'lucide-react'
 import LoginForm from '@/components/LoginForm'
+import SignupForm, { SignupData } from '@/components/SignupForm'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
-type AppState = 'role-selection' | 'login' | 'loading' | 'dashboard'
+type AppState = 'role-selection' | 'login' | 'signup' | 'loading' | 'dashboard'
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('role-selection')
@@ -22,38 +23,89 @@ export default function Home() {
     setAppState('login')
   }
 
+  const handleSignupClick = (role: 'student' | 'alumni') => {
+    console.log('Signup selected for role:', role) // Debug log
+    setSelectedRole(role)
+    setAppState('signup')
+  }
+
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Mock user data - in real app, this would come from authentication
-    const mockUser = {
-      id: '1',
-      name: selectedRole === 'student' ? 'John Student' : selectedRole === 'alumni' ? 'Jane Alumni' : 'Admin User',
-      email: email,
-      role: selectedRole!,
-      profileImage: '',
-      bio: selectedRole === 'student' ? 'Computer Science Student' : selectedRole === 'alumni' ? 'Software Engineer at Tech Corp' : 'Platform Administrator',
-      department: 'Computer Science',
-      graduationYear: selectedRole === 'student' ? 2025 : 2020,
-      currentPosition: selectedRole === 'alumni' ? 'Senior Software Engineer' : undefined,
-      company: selectedRole === 'alumni' ? 'Tech Corp' : undefined,
-      followers: selectedRole === 'alumni' ? 150 : 0,
-      following: selectedRole === 'student' ? 25 : 0
+    try {
+      // Call login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role: selectedRole
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed')
+      }
+
+      console.log('Login successful:', data.user) // Debug log
+      setUser(data.user)
+      setAppState('loading')
+      
+      // Navigate to appropriate dashboard
+      setTimeout(() => {
+        console.log('Navigating to:', `/${selectedRole}`) // Debug log
+        router.push(`/${selectedRole}`)
+      }, 1500)
+    } catch (error) {
+      console.error('Login error:', error)
+      alert(error instanceof Error ? error.message : 'Login failed')
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  const handleSignup = async (userData: SignupData) => {
+    setIsLoading(true)
     
-    console.log('Setting user:', mockUser) // Debug log
-    setUser(mockUser)
-    
-    setAppState('loading')
-    
-    // Navigate to appropriate dashboard
-    setTimeout(() => {
-      console.log('Navigating to:', `/${selectedRole}`) // Debug log
-      router.push(`/${selectedRole}`)
-    }, 1500)
+    try {
+      // Call signup API
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...userData,
+          role: selectedRole
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed')
+      }
+
+      console.log('Signup successful:', data.user) // Debug log
+      setUser(data.user)
+      setAppState('loading')
+      
+      // Navigate to appropriate dashboard
+      setTimeout(() => {
+        console.log('Navigating to:', `/${selectedRole}`) // Debug log
+        router.push(`/${selectedRole}`)
+      }, 1500)
+    } catch (error) {
+      console.error('Signup error:', error)
+      alert(error instanceof Error ? error.message : 'Signup failed')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleBackToRoleSelection = () => {
@@ -68,6 +120,18 @@ export default function Home() {
         role={selectedRole}
         onBack={handleBackToRoleSelection}
         onLogin={handleLogin}
+        onSignup={selectedRole !== 'admin' ? () => handleSignupClick(selectedRole as 'student' | 'alumni') : undefined}
+        isLoading={isLoading}
+      />
+    )
+  }
+
+  if (appState === 'signup' && selectedRole && (selectedRole === 'student' || selectedRole === 'alumni')) {
+    return (
+      <SignupForm
+        role={selectedRole}
+        onBack={handleBackToRoleSelection}
+        onSignup={handleSignup}
         isLoading={isLoading}
       />
     )
@@ -100,10 +164,7 @@ export default function Home() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {/* Student Role */}
-          <div 
-            className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2"
-            onClick={() => handleRoleSelection('student')}
-          >
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
             <div className="text-center">
               <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <GraduationCap className="w-10 h-10 text-blue-600" />
@@ -112,18 +173,26 @@ export default function Home() {
               <p className="text-gray-600 mb-6">
                 Access your profile, connect with alumni, book mentoring sessions, and explore career paths
               </p>
-              <div className="flex items-center justify-center text-blue-600 font-semibold">
-                Continue as Student
-                <ArrowRight className="w-5 h-5 ml-2" />
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleRoleSelection('student')}
+                  className="w-full flex items-center justify-center text-blue-600 font-semibold py-2 px-4 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  Sign In
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+                <button
+                  onClick={() => handleSignupClick('student')}
+                  className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Sign Up
+                </button>
               </div>
             </div>
           </div>
 
           {/* Alumni Role */}
-          <div 
-            className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2"
-            onClick={() => handleRoleSelection('alumni')}
-          >
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
             <div className="text-center">
               <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <User className="w-10 h-10 text-green-600" />
@@ -132,9 +201,20 @@ export default function Home() {
               <p className="text-gray-600 mb-6">
                 Manage your profile, connect with students, accept mentoring requests, and share insights
               </p>
-              <div className="flex items-center justify-center text-green-600 font-semibold">
-                Continue as Alumni
-                <ArrowRight className="w-5 h-5 ml-2" />
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleRoleSelection('alumni')}
+                  className="w-full flex items-center justify-center text-green-600 font-semibold py-2 px-4 border border-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                >
+                  Sign In
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+                <button
+                  onClick={() => handleSignupClick('alumni')}
+                  className="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Sign Up
+                </button>
               </div>
             </div>
           </div>
@@ -153,7 +233,7 @@ export default function Home() {
                 Manage platform settings, moderate content, and oversee user interactions
               </p>
               <div className="flex items-center justify-center text-purple-600 font-semibold">
-                Continue as Admin
+                Sign In as Admin
                 <ArrowRight className="w-5 h-5 ml-2" />
               </div>
             </div>

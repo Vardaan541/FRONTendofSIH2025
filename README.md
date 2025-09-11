@@ -1,21 +1,21 @@
 # Alumni Management Platform
 
-A comprehensive digital platform for centralized alumni data management and engagement, built with Next.js, React, and TypeScript.
+A comprehensive digital platform for centralized alumni data management and engagement with integrated payment processing, built with Next.js, React, and TypeScript.
 
 ## Features
 
 ### 🎓 Student Features
-- **Profile Management**: Complete student profile with academic information
+- **Enhanced Profile Management**: Comprehensive student profile with academic information, projects, achievements, and social links
 - **Alumni Network**: Browse and connect with alumni from your institution
-- **Session Booking**: Book paid mentoring sessions with alumni
+- **Session Booking with Payment**: Book paid mentoring sessions with integrated Razorpay payment gateway
 - **Career AI Assistant**: Get personalized career guidance and insights
 - **Posts Feed**: View posts and insights shared by alumni
 - **Leaderboard**: See top-performing alumni based on community engagement
 
 ### 👨‍💼 Alumni Features
-- **Profile Management**: Professional profile with career information
+- **Enhanced Profile Management**: Professional profile with career information, mentoring areas, and hourly rates
 - **Student Connections**: View and manage student mentoring requests
-- **Session Management**: Accept/reject mentoring session requests
+- **Session Management**: Accept/reject mentoring session requests with payment tracking
 - **Content Creation**: Create and share posts with the community
 - **Performance Tracking**: View your impact and engagement metrics
 - **Leaderboard**: Compete with other alumni for top positions
@@ -30,6 +30,7 @@ A comprehensive digital platform for centralized alumni data management and enga
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand
+- **Payment Gateway**: Razorpay
 - **Icons**: Lucide React
 - **Animations**: Framer Motion
 - **Forms**: React Hook Form
@@ -53,12 +54,21 @@ cd alumni-management-platform
 npm install
 ```
 
-3. Run the development server:
+3. Set up environment variables:
+Create a `.env.local` file in the root directory:
+```env
+# Razorpay Configuration
+RAZORPAY_KEY_ID=your_razorpay_key_id_here
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret_here
+NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key_id_here
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Structure
 
@@ -85,6 +95,25 @@ npm run dev
 │   └── store.ts          # Zustand store
 └── public/               # Static assets
 ```
+
+## 🆕 New Features Added
+
+### Enhanced Signup Process
+- **Multi-step Registration**: Progressive form with 5-6 steps based on user role
+- **Comprehensive Profile Data**: Academic details, projects, achievements, social links
+- **Form Validation**: Real-time validation with user-friendly error messages
+- **Progress Tracking**: Visual progress indicators and step navigation
+
+### Razorpay Payment Integration
+- **Secure Payment Processing**: Integrated Razorpay for session bookings
+- **Real-time Verification**: Automatic payment verification and session creation
+- **Payment Status Tracking**: Complete payment lifecycle management
+- **User-friendly Interface**: Loading states and error handling
+
+### Enhanced Profile Management
+- **Student Profiles**: CGPA, projects, achievements, social links (GitHub, LinkedIn, Portfolio)
+- **Alumni Profiles**: Hourly rates, mentoring areas, professional experience
+- **Rich Data Collection**: Comprehensive information for better matching
 
 ## Key Features Implementation
 
@@ -138,7 +167,7 @@ The application includes comprehensive mock data for:
 
 - **Real Authentication**: Implement proper authentication system
 - **Database Integration**: Connect to a real database
-- **Payment Processing**: Integrate payment gateway for session bookings
+- **Enhanced Payment Processing**: ✅ Integrated Razorpay payment gateway for session bookings
 - **Real-time Features**: WebSocket integration for live updates
 - **Admin Panel**: Complete admin dashboard for platform management
 - **Mobile App**: React Native mobile application

@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  Plus
+  Plus,
+  MessageCircle
 } from 'lucide-react'
 
 interface NavigationProps {
@@ -35,6 +36,7 @@ export default function Navigation({ userRole }: NavigationProps) {
     { name: 'Profile', href: '/student/profile', icon: User },
     { name: 'My Alumni', href: '/student/alumni', icon: Users },
     { name: 'Career AI', href: '/student/career-ai', icon: Brain },
+    { name: 'Messages', href: '/student/messaging', icon: MessageCircle },
   ]
 
   const alumniNavItems = [
@@ -42,6 +44,7 @@ export default function Navigation({ userRole }: NavigationProps) {
     { name: 'Profile', href: '/alumni/profile', icon: User },
     { name: 'My Students', href: '/alumni/students', icon: Users },
     { name: 'Create Post', href: '/alumni/create-post', icon: Plus },
+    { name: 'Messages', href: '/alumni/messaging', icon: MessageCircle },
   ]
 
   const navItems = userRole === 'student' ? studentNavItems : alumniNavItems

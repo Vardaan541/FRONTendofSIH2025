@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
+import RazorpayPayment from '@/components/RazorpayPayment'
 import { Search, UserPlus, Calendar, DollarSign, MessageCircle, MapPin, Building } from 'lucide-react'
 
 interface Alumni {
@@ -30,6 +31,9 @@ export default function MyAlumni() {
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [bookingHours, setBookingHours] = useState(1)
   const [bookingMessage, setBookingMessage] = useState('')
+  const [showPayment, setShowPayment] = useState(false)
+  const [orderData, setOrderData] = useState<any>(null)
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false)
 
   const [alumni, setAlumni] = useState<Alumni[]>([
     {
@@ -124,15 +128,70 @@ export default function MyAlumni() {
     setShowBookingModal(true)
   }
 
-  const handleConfirmBooking = () => {
-    if (selectedAlumni) {
-      // In a real app, this would create a session request
-      alert(`Session booking request sent to ${selectedAlumni.name} for ${bookingHours} hour(s) at $${selectedAlumni.hourlyRate}/hour. Total: $${selectedAlumni.hourlyRate * bookingHours}`)
-      setShowBookingModal(false)
-      setBookingHours(1)
-      setBookingMessage('')
-      setSelectedAlumni(null)
+  const handleConfirmBooking = async () => {
+    if (!selectedAlumni || !user) return
+
+    setIsCreatingOrder(true)
+    try {
+      const sessionData = {
+        studentId: user.id,
+        studentName: user.name,
+        alumniId: selectedAlumni.id,
+        alumniName: selectedAlumni.name,
+        hours: bookingHours,
+        amount: selectedAlumni.hourlyRate * bookingHours,
+        message: bookingMessage,
+      }
+
+      const response = await fetch('/api/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: sessionData.amount,
+          currency: 'INR',
+          sessionData,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setOrderData(result)
+        setShowBookingModal(false)
+        setShowPayment(true)
+      } else {
+        alert(`Error: ${result.error}`)
+      }
+    } catch (error) {
+      alert('Failed to create payment order. Please try again.')
+    } finally {
+      setIsCreatingOrder(false)
     }
+  }
+
+  const handlePaymentSuccess = (sessionRequest: any) => {
+    // Add the session request to the store
+    // In a real app, this would be handled by the backend
+    setShowPayment(false)
+    setBookingHours(1)
+    setBookingMessage('')
+    setSelectedAlumni(null)
+    setOrderData(null)
+    
+    // Show success message
+    alert(`Session booking request sent to ${sessionRequest.alumniName} for ${sessionRequest.hours} hour(s). You will be notified once they respond.`)
+  }
+
+  const handlePaymentError = (error: string) => {
+    setShowPayment(false)
+    alert(`Payment failed: ${error}`)
+  }
+
+  const handlePaymentClose = () => {
+    setShowPayment(false)
+    setOrderData(null)
   }
 
   const filteredAlumni = alumni.filter(alum =>
@@ -304,13 +363,40 @@ export default function MyAlumni() {
               </button>
               <button
                 onClick={handleConfirmBooking}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                disabled={isCreatingOrder}
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                Send Request
+                {isCreatingOrder ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <span>Pay & Send Request</span>
+                )}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Razorpay Payment Component */}
+      {showPayment && orderData && selectedAlumni && (
+        <RazorpayPayment
+          orderData={orderData}
+          sessionData={{
+            studentId: user?.id || '',
+            studentName: user?.name || '',
+            alumniId: selectedAlumni.id,
+            alumniName: selectedAlumni.name,
+            hours: bookingHours,
+            amount: selectedAlumni.hourlyRate * bookingHours,
+            message: bookingMessage,
+          }}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          onClose={handlePaymentClose}
+        />
       )}
     </div>
   )

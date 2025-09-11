@@ -7,10 +7,11 @@ interface LoginFormProps {
   role: 'student' | 'alumni' | 'admin'
   onBack: () => void
   onLogin: (email: string, password: string) => void
+  onSignup?: () => void
   isLoading: boolean
 }
 
-export default function LoginForm({ role, onBack, onLogin, isLoading }: LoginFormProps) {
+export default function LoginForm({ role, onBack, onLogin, onSignup, isLoading }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -125,10 +126,10 @@ export default function LoginForm({ role, onBack, onLogin, isLoading }: LoginFor
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
+                  className={`input-enhanced pl-10 ${
                     errors.email
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-blue-500'
+                      ? 'border-red-300 focus:ring-red-100 focus:border-red-500'
+                      : ''
                   }`}
                   placeholder="Enter your email"
                   disabled={isLoading}
@@ -153,10 +154,10 @@ export default function LoginForm({ role, onBack, onLogin, isLoading }: LoginFor
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
+                  className={`input-enhanced pl-10 pr-12 ${
                     errors.password
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-blue-500'
+                      ? 'border-red-300 focus:ring-red-100 focus:border-red-500'
+                      : ''
                   }`}
                   placeholder="Enter your password"
                   disabled={isLoading}
@@ -229,9 +230,18 @@ export default function LoginForm({ role, onBack, onLogin, isLoading }: LoginFor
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                Contact administrator
-              </a>
+              {onSignup && role !== 'admin' ? (
+                <button
+                  onClick={onSignup}
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Sign up here
+                </button>
+              ) : (
+                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                  Contact administrator
+                </a>
+              )}
             </p>
           </div>
         </div>

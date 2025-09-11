@@ -1,8 +1,1 @@
-{
-  "/page": "app/page.js",
-  "/alumni/create-post/page": "app/alumni/create-post/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/alumni/leaderboard/page": "app/alumni/leaderboard/page.js",
-  "/student/page": "app/student/page.js",
-  "/alumni/page": "app/alumni/page.js"
-}
+{}

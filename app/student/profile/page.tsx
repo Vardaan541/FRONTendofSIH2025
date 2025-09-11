@@ -124,7 +124,7 @@ export default function StudentProfile() {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -135,7 +135,7 @@ export default function StudentProfile() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -146,7 +146,7 @@ export default function StudentProfile() {
                       type="text"
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                   <div>
@@ -157,7 +157,7 @@ export default function StudentProfile() {
                       type="number"
                       value={formData.graduationYear}
                       onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-enhanced"
                     />
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export default function StudentProfile() {
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="textarea-enhanced"
                     placeholder="Tell us about yourself, your interests, and goals..."
                   />
                 </div>
