@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
-import RazorpayPayment from '@/components/RazorpayPayment'
+import SessionBookingForm from '@/components/SessionBookingForm'
 import { Search, UserPlus, Calendar, DollarSign, MessageCircle, MapPin, Building } from 'lucide-react'
 
 interface Alumni {
@@ -29,11 +29,6 @@ export default function MyAlumni() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedAlumni, setSelectedAlumni] = useState<Alumni | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
-  const [bookingHours, setBookingHours] = useState(1)
-  const [bookingMessage, setBookingMessage] = useState('')
-  const [showPayment, setShowPayment] = useState(false)
-  const [orderData, setOrderData] = useState<any>(null)
-  const [isCreatingOrder, setIsCreatingOrder] = useState(false)
 
   const [alumni, setAlumni] = useState<Alumni[]>([
     {
@@ -128,70 +123,9 @@ export default function MyAlumni() {
     setShowBookingModal(true)
   }
 
-  const handleConfirmBooking = async () => {
-    if (!selectedAlumni || !user) return
-
-    setIsCreatingOrder(true)
-    try {
-      const sessionData = {
-        studentId: user.id,
-        studentName: user.name,
-        alumniId: selectedAlumni.id,
-        alumniName: selectedAlumni.name,
-        hours: bookingHours,
-        amount: selectedAlumni.hourlyRate * bookingHours,
-        message: bookingMessage,
-      }
-
-      const response = await fetch('/api/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: sessionData.amount,
-          currency: 'INR',
-          sessionData,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        setOrderData(result)
-        setShowBookingModal(false)
-        setShowPayment(true)
-      } else {
-        alert(`Error: ${result.error}`)
-      }
-    } catch (error) {
-      alert('Failed to create payment order. Please try again.')
-    } finally {
-      setIsCreatingOrder(false)
-    }
-  }
-
-  const handlePaymentSuccess = (sessionRequest: any) => {
-    // Add the session request to the store
-    // In a real app, this would be handled by the backend
-    setShowPayment(false)
-    setBookingHours(1)
-    setBookingMessage('')
+  const handleCloseBookingModal = () => {
+    setShowBookingModal(false)
     setSelectedAlumni(null)
-    setOrderData(null)
-    
-    // Show success message
-    alert(`Session booking request sent to ${sessionRequest.alumniName} for ${sessionRequest.hours} hour(s). You will be notified once they respond.`)
-  }
-
-  const handlePaymentError = (error: string) => {
-    setShowPayment(false)
-    alert(`Payment failed: ${error}`)
-  }
-
-  const handlePaymentClose = () => {
-    setShowPayment(false)
-    setOrderData(null)
   }
 
   const filteredAlumni = alumni.filter(alum =>
@@ -302,100 +236,12 @@ export default function MyAlumni() {
         )}
       </div>
 
-      {/* Booking Modal */}
+      {/* Session Booking Form */}
       {showBookingModal && selectedAlumni && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Book Session with {selectedAlumni.name}
-            </h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Number of Hours
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="8"
-                  value={bookingHours}
-                  onChange={(e) => setBookingHours(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Message (Optional)
-                </label>
-                <textarea
-                  value={bookingMessage}
-                  onChange={(e) => setBookingMessage(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="What would you like to discuss in this session?"
-                />
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-md">
-                <div className="flex justify-between text-sm">
-                  <span>Rate per hour:</span>
-                  <span>${selectedAlumni.hourlyRate}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Hours:</span>
-                  <span>{bookingHours}</span>
-                </div>
-                <div className="flex justify-between font-semibold border-t pt-2 mt-2">
-                  <span>Total:</span>
-                  <span>${selectedAlumni.hourlyRate * bookingHours}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex space-x-4 mt-6">
-              <button
-                onClick={() => setShowBookingModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmBooking}
-                disabled={isCreatingOrder}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                {isCreatingOrder ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <span>Pay & Send Request</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Razorpay Payment Component */}
-      {showPayment && orderData && selectedAlumni && (
-        <RazorpayPayment
-          orderData={orderData}
-          sessionData={{
-            studentId: user?.id || '',
-            studentName: user?.name || '',
-            alumniId: selectedAlumni.id,
-            alumniName: selectedAlumni.name,
-            hours: bookingHours,
-            amount: selectedAlumni.hourlyRate * bookingHours,
-            message: bookingMessage,
-          }}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-          onClose={handlePaymentClose}
+        <SessionBookingForm
+          alumni={selectedAlumni}
+          isOpen={showBookingModal}
+          onClose={handleCloseBookingModal}
         />
       )}
     </div>

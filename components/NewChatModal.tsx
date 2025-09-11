@@ -49,7 +49,7 @@ export default function NewChatModal({ isOpen, onClose, onChatCreated }: NewChat
     const selectedUser = sampleUsers.find(u => u.id === selectedUsers[0])
     const chatName = chatType === 'direct' 
       ? selectedUser?.name || 'New Chat'
-      : 'New Group'
+      : chatName || 'New Group'
 
     const newChat: Chat = {
       id: Date.now().toString(),

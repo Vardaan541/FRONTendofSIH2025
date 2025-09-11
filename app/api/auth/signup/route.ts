@@ -107,17 +107,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Role-specific validation (role is passed separately in the request)
-    const role = request.nextUrl.searchParams.get('role') as 'student' | 'alumni'
-    
-    if (role === 'student') {
+    // Role-specific validation
+    if (body.role === 'student') {
       if (!body.studentId || !body.currentSemester) {
         return NextResponse.json(
           { error: 'Student ID and current semester are required for students' },
           { status: 400 }
         )
       }
-    } else if (role === 'alumni') {
+    } else if (body.role === 'alumni') {
       if (!body.currentPosition || !body.company || body.experience === undefined) {
         return NextResponse.json(
           { error: 'Current position, company, and experience are required for alumni' },
@@ -135,11 +133,11 @@ export async function POST(request: NextRequest) {
       phone: body.phone,
       department: body.department,
       bio: body.bio || '',
-      role: role,
+      role: body.role,
       createdAt: new Date().toISOString(),
       isActive: true,
       // Student specific fields
-      ...(role === 'student' && {
+      ...(body.role === 'student' && {
         studentId: body.studentId,
         graduationYear: body.graduationYear,
         currentSemester: body.currentSemester,
@@ -147,7 +145,7 @@ export async function POST(request: NextRequest) {
         following: 0
       }),
       // Alumni specific fields
-      ...(role === 'alumni' && {
+      ...(body.role === 'alumni' && {
         graduationYear: body.graduationYear,
         currentPosition: body.currentPosition,
         company: body.company,

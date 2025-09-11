@@ -19,23 +19,11 @@ export interface SignupData {
   phone: string
   department: string
   bio: string
-  dateOfBirth?: string
-  gender?: string
-  location?: string
-  interests?: string[]
-  profileImage?: string
   
   // Student specific
   studentId?: string
+  graduationYear?: number
   currentSemester?: string
-  cgpa?: number
-  projects?: string[]
-  achievements?: string[]
-  socialLinks?: {
-    github?: string
-    linkedin?: string
-    portfolio?: string
-  }
   
   // Alumni specific
   graduationYear?: number
@@ -44,20 +32,6 @@ export interface SignupData {
   experience?: number
   linkedinProfile?: string
   skills?: string[]
-  hourlyRate?: number
-  availability?: string[]
-  mentoringAreas?: string[]
-  education?: {
-    degree: string
-    institution: string
-    year: number
-  }[]
-  workExperience?: {
-    company: string
-    position: string
-    duration: string
-    description: string
-  }[]
 }
 
 export default function SignupForm({ role, onBack, onSignup, isLoading }: SignupFormProps) {
@@ -69,32 +43,14 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
     phone: '',
     department: '',
     bio: '',
-    dateOfBirth: '',
-    gender: '',
-    location: '',
-    interests: [],
-    profileImage: '',
     studentId: '',
     graduationYear: new Date().getFullYear(),
     currentSemester: '',
-    cgpa: 0,
-    projects: [],
-    achievements: [],
-    socialLinks: {
-      github: '',
-      linkedin: '',
-      portfolio: ''
-    },
     currentPosition: '',
     company: '',
     experience: 0,
     linkedinProfile: '',
-    skills: [],
-    hourlyRate: 50,
-    availability: [],
-    mentoringAreas: [],
-    education: [],
-    workExperience: []
+    skills: []
   })
   
   const [showPassword, setShowPassword] = useState(false)
@@ -103,7 +59,7 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
   const [currentStep, setCurrentStep] = useState(1)
   const [skillsInput, setSkillsInput] = useState('')
 
-  const totalSteps = role === 'student' ? 5 : 6
+  const totalSteps = role === 'student' ? 3 : 4
 
   const validateStep = (step: number) => {
     const newErrors: Record<string, string> = {}
@@ -193,57 +149,6 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
     setFormData({
       ...formData,
       skills: formData.skills?.filter(skill => skill !== skillToRemove) || []
-    })
-  }
-
-  const addProject = () => {
-    if (skillsInput.trim() && !formData.projects?.includes(skillsInput.trim())) {
-      setFormData({
-        ...formData,
-        projects: [...(formData.projects || []), skillsInput.trim()]
-      })
-      setSkillsInput('')
-    }
-  }
-
-  const removeProject = (projectToRemove: string) => {
-    setFormData({
-      ...formData,
-      projects: formData.projects?.filter(project => project !== projectToRemove) || []
-    })
-  }
-
-  const addAchievement = () => {
-    if (skillsInput.trim() && !formData.achievements?.includes(skillsInput.trim())) {
-      setFormData({
-        ...formData,
-        achievements: [...(formData.achievements || []), skillsInput.trim()]
-      })
-      setSkillsInput('')
-    }
-  }
-
-  const removeAchievement = (achievementToRemove: string) => {
-    setFormData({
-      ...formData,
-      achievements: formData.achievements?.filter(achievement => achievement !== achievementToRemove) || []
-    })
-  }
-
-  const addMentoringArea = () => {
-    if (skillsInput.trim() && !formData.mentoringAreas?.includes(skillsInput.trim())) {
-      setFormData({
-        ...formData,
-        mentoringAreas: [...(formData.mentoringAreas || []), skillsInput.trim()]
-      })
-      setSkillsInput('')
-    }
-  }
-
-  const removeMentoringArea = (areaToRemove: string) => {
-    setFormData({
-      ...formData,
-      mentoringAreas: formData.mentoringAreas?.filter(area => area !== areaToRemove) || []
     })
   }
 
@@ -523,57 +428,6 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
           disabled={isLoading}
         />
       </div>
-
-      {/* Date of Birth Field */}
-      <div>
-        <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-          Date of Birth
-        </label>
-        <input
-          id="dateOfBirth"
-          type="date"
-          value={formData.dateOfBirth || ''}
-          onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-          className="input-enhanced"
-          disabled={isLoading}
-        />
-      </div>
-
-      {/* Gender Field */}
-      <div>
-        <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
-          Gender
-        </label>
-        <select
-          id="gender"
-          value={formData.gender || ''}
-          onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-          className="input-enhanced"
-          disabled={isLoading}
-        >
-          <option value="">Select gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-          <option value="Prefer not to say">Prefer not to say</option>
-        </select>
-      </div>
-
-      {/* Location Field */}
-      <div>
-        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-          Location
-        </label>
-        <input
-          id="location"
-          type="text"
-          value={formData.location || ''}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          className="input-enhanced"
-          placeholder="City, State, Country"
-          disabled={isLoading}
-        />
-      </div>
     </div>
   )
 
@@ -581,27 +435,8 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
     if (role === 'student') {
       return (
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
           
-          {/* CGPA Field */}
-          <div>
-            <label htmlFor="cgpa" className="block text-sm font-medium text-gray-700 mb-2">
-              Current CGPA
-            </label>
-            <input
-              id="cgpa"
-              type="number"
-              min="0"
-              max="10"
-              step="0.01"
-              value={formData.cgpa || ''}
-              onChange={(e) => setFormData({ ...formData, cgpa: parseFloat(e.target.value) })}
-              className="input-enhanced"
-              placeholder="Enter your current CGPA"
-              disabled={isLoading}
-            />
-          </div>
-
           {/* Graduation Year for Students */}
           <div>
             <label htmlFor="graduationYear" className="block text-sm font-medium text-gray-700 mb-2">
@@ -714,330 +549,57 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
     )
   }
 
-  const renderStep4 = () => {
-    if (role === 'student') {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Projects & Achievements</h3>
-          
-          {/* Projects Input */}
-          <div>
-            <label htmlFor="projects" className="block text-sm font-medium text-gray-700 mb-2">
-              Projects
-            </label>
-            <div className="flex space-x-2">
-              <input
-                id="projects"
-                type="text"
-                value={skillsInput}
-                onChange={(e) => setSkillsInput(e.target.value)}
-                className="input-enhanced flex-1"
-                placeholder="Add a project (e.g., E-commerce Website, Mobile App)"
-                disabled={isLoading}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addProject())}
-              />
-              <button
-                type="button"
-                onClick={addProject}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                disabled={isLoading}
-              >
-                Add
-              </button>
-            </div>
-            
-            {/* Projects Display */}
-            {formData.projects && formData.projects.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {formData.projects.map((project, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                  >
-                    {project}
-                    <button
-                      type="button"
-                      onClick={() => removeProject(project)}
-                      className="ml-2 text-green-600 hover:text-green-800"
-                      disabled={isLoading}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Achievements Input */}
-          <div>
-            <label htmlFor="achievements" className="block text-sm font-medium text-gray-700 mb-2">
-              Achievements
-            </label>
-            <div className="flex space-x-2">
-              <input
-                id="achievements"
-                type="text"
-                value={skillsInput}
-                onChange={(e) => setSkillsInput(e.target.value)}
-                className="input-enhanced flex-1"
-                placeholder="Add an achievement (e.g., Hackathon Winner, Scholarship)"
-                disabled={isLoading}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAchievement())}
-              />
-              <button
-                type="button"
-                onClick={addAchievement}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                disabled={isLoading}
-              >
-                Add
-              </button>
-            </div>
-            
-            {/* Achievements Display */}
-            {formData.achievements && formData.achievements.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {formData.achievements.map((achievement, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800"
-                  >
-                    {achievement}
-                    <button
-                      type="button"
-                      onClick={() => removeAchievement(achievement)}
-                      className="ml-2 text-purple-600 hover:text-purple-800"
-                      disabled={isLoading}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Skills & Interests</h3>
-        
-        {/* Skills Input */}
-        <div>
-          <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-2">
-            Skills
-          </label>
-          <div className="flex space-x-2">
-            <input
-              id="skills"
-              type="text"
-              value={skillsInput}
-              onChange={(e) => setSkillsInput(e.target.value)}
-              className="input-enhanced flex-1"
-              placeholder="Add a skill (e.g., JavaScript, Python, Leadership)"
-              disabled={isLoading}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-            />
-            <button
-              type="button"
-              onClick={addSkill}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              disabled={isLoading}
-            >
-              Add
-            </button>
-          </div>
-          
-          {/* Skills Display */}
-          {formData.skills && formData.skills.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {formData.skills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
-                >
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() => removeSkill(skill)}
-                    className="ml-2 text-blue-600 hover:text-blue-800"
-                    disabled={isLoading}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  const renderStep5 = () => {
-    if (role === 'student') {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Links & Interests</h3>
-          
-          {/* Social Links */}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="github" className="block text-sm font-medium text-gray-700 mb-2">
-                GitHub Profile
-              </label>
-              <input
-                id="github"
-                type="url"
-                value={formData.socialLinks?.github || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  socialLinks: { ...formData.socialLinks, github: e.target.value }
-                })}
-                className="input-enhanced"
-                placeholder="https://github.com/yourusername"
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700 mb-2">
-                LinkedIn Profile
-              </label>
-              <input
-                id="linkedin"
-                type="url"
-                value={formData.socialLinks?.linkedin || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  socialLinks: { ...formData.socialLinks, linkedin: e.target.value }
-                })}
-                className="input-enhanced"
-                placeholder="https://linkedin.com/in/yourprofile"
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="portfolio" className="block text-sm font-medium text-gray-700 mb-2">
-                Portfolio Website
-              </label>
-              <input
-                id="portfolio"
-                type="url"
-                value={formData.socialLinks?.portfolio || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  socialLinks: { ...formData.socialLinks, portfolio: e.target.value }
-                })}
-                className="input-enhanced"
-                placeholder="https://yourportfolio.com"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Mentoring Preferences</h3>
-        
-        {/* Hourly Rate */}
-        <div>
-          <label htmlFor="hourlyRate" className="block text-sm font-medium text-gray-700 mb-2">
-            Hourly Rate (₹)
-          </label>
-          <input
-            id="hourlyRate"
-            type="number"
-            min="100"
-            max="5000"
-            value={formData.hourlyRate || ''}
-            onChange={(e) => setFormData({ ...formData, hourlyRate: parseInt(e.target.value) })}
-            className="input-enhanced"
-            placeholder="Enter your hourly rate"
-            disabled={isLoading}
-          />
-        </div>
-
-        {/* Mentoring Areas */}
-        <div>
-          <label htmlFor="mentoringAreas" className="block text-sm font-medium text-gray-700 mb-2">
-            Mentoring Areas
-          </label>
-          <div className="flex space-x-2">
-            <input
-              id="mentoringAreas"
-              type="text"
-              value={skillsInput}
-              onChange={(e) => setSkillsInput(e.target.value)}
-              className="input-enhanced flex-1"
-              placeholder="Add mentoring area (e.g., Career Guidance, Technical Skills)"
-              disabled={isLoading}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMentoringArea())}
-            />
-            <button
-              type="button"
-              onClick={addMentoringArea}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              disabled={isLoading}
-            >
-              Add
-            </button>
-          </div>
-          
-          {/* Mentoring Areas Display */}
-          {formData.mentoringAreas && formData.mentoringAreas.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {formData.mentoringAreas.map((area, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                >
-                  {area}
-                  <button
-                    type="button"
-                    onClick={() => removeMentoringArea(area)}
-                    className="ml-2 text-green-600 hover:text-green-800"
-                    disabled={isLoading}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  const renderStep6 = () => (
+  const renderStep4 = () => (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Final Review</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Skills & Interests</h3>
       
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h4 className="font-medium text-gray-900 mb-2">Profile Summary</h4>
-        <div className="text-sm text-gray-600 space-y-1">
-          <p><strong>Name:</strong> {formData.name}</p>
-          <p><strong>Email:</strong> {formData.email}</p>
-          <p><strong>Department:</strong> {formData.department}</p>
-          {formData.location && <p><strong>Location:</strong> {formData.location}</p>}
-          {role === 'student' && formData.studentId && <p><strong>Student ID:</strong> {formData.studentId}</p>}
-          {role === 'alumni' && formData.company && <p><strong>Company:</strong> {formData.company}</p>}
-          {formData.skills && formData.skills.length > 0 && (
-            <p><strong>Skills:</strong> {formData.skills.join(', ')}</p>
-          )}
+      {/* Skills Input */}
+      <div>
+        <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-2">
+          Skills
+        </label>
+        <div className="flex space-x-2">
+          <input
+            id="skills"
+            type="text"
+            value={skillsInput}
+            onChange={(e) => setSkillsInput(e.target.value)}
+            className="input-enhanced flex-1"
+            placeholder="Add a skill (e.g., JavaScript, Python, Leadership)"
+            disabled={isLoading}
+            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+          />
+          <button
+            type="button"
+            onClick={addSkill}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={isLoading}
+          >
+            Add
+          </button>
         </div>
-      </div>
-
-      <div className="text-sm text-gray-600">
-        <p>By creating an account, you agree to our Terms of Service and Privacy Policy.</p>
+        
+        {/* Skills Display */}
+        {formData.skills && formData.skills.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {formData.skills.map((skill, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+              >
+                {skill}
+                <button
+                  type="button"
+                  onClick={() => removeSkill(skill)}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                  disabled={isLoading}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -1089,8 +651,6 @@ export default function SignupForm({ role, onBack, onSignup, isLoading }: Signup
             {currentStep === 2 && renderStep2()}
             {currentStep === 3 && renderStep3()}
             {currentStep === 4 && renderStep4()}
-            {currentStep === 5 && renderStep5()}
-            {currentStep === 6 && renderStep6()}
 
             {/* Navigation Buttons */}
             <div className="flex justify-between pt-6">
