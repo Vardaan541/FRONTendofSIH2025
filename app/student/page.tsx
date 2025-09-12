@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
 import CommentModal from '@/components/CommentModal'
-import { FileText, Trophy, Users, MessageCircle, Heart, Share2 } from 'lucide-react'
+import DonationModal from '@/components/DonationModal'
+import { FileText, Trophy, Users, MessageCircle, Heart, Share2, Gift } from 'lucide-react'
 
 export default function StudentDashboard() {
   const { user, posts, setUser, updatePost, comments } = useStore()
   const router = useRouter()
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [showDonationModal, setShowDonationModal] = useState(false)
   const [leaderboard, setLeaderboard] = useState([
     { id: '1', name: 'Sarah Johnson', followers: 250, position: 'Senior Software Engineer', company: 'Google' },
     { id: '2', name: 'Michael Chen', followers: 200, position: 'Product Manager', company: 'Microsoft' },
@@ -257,6 +259,24 @@ export default function StudentDashboard() {
               </button>
             </div>
 
+            {/* Support Platform */}
+            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg shadow-sm border border-red-100 p-6">
+              <div className="flex items-center space-x-2 mb-3">
+                <Gift className="w-5 h-5 text-red-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Support Our Platform</h3>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">
+                Help us maintain and improve the alumni mentoring platform for students like you.
+              </p>
+              <button 
+                onClick={() => setShowDonationModal(true)}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Heart className="w-4 h-4" />
+                <span>Make a Donation</span>
+              </button>
+            </div>
+
             {/* Quick Stats */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Activity</h3>
@@ -284,6 +304,14 @@ export default function StudentDashboard() {
         postId={selectedPostId || ''}
         isOpen={selectedPostId !== null}
         onClose={handleCloseCommentModal}
+      />
+
+      {/* Donation Modal */}
+      <DonationModal
+        isOpen={showDonationModal}
+        onClose={() => setShowDonationModal(false)}
+        donorName={user?.name || 'Student'}
+        donorEmail={user?.email || ''}
       />
     </div>
   )

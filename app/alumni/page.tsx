@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
 import CommentModal from '@/components/CommentModal'
-import { FileText, Trophy, Users, MessageCircle, Heart, Share2, Plus, TrendingUp, Target, Award, Calendar, MapPin, Clock, DollarSign, X } from 'lucide-react'
+import DonationModal from '@/components/DonationModal'
+import { FileText, Trophy, Users, MessageCircle, Heart, Share2, Plus, TrendingUp, Target, Award, Calendar, MapPin, Clock, DollarSign, X, Gift } from 'lucide-react'
 
 export default function AlumniDashboard() {
   const { user, posts, setUser, updatePost, comments, careerMilestones, careerGoals, skillProgress } = useStore()
   const router = useRouter()
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [showEventRequestModal, setShowEventRequestModal] = useState(false)
+  const [showDonationModal, setShowDonationModal] = useState(false)
   const [eventRequestForm, setEventRequestForm] = useState({
     title: '',
     description: '',
@@ -359,6 +361,24 @@ export default function AlumniDashboard() {
               </div>
             </div>
 
+            {/* Support Platform */}
+            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg shadow-sm border border-red-100 p-6">
+              <div className="flex items-center space-x-2 mb-3">
+                <Gift className="w-5 h-5 text-red-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Support Our Platform</h3>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">
+                Help us maintain and improve the alumni mentoring platform for the next generation of students.
+              </p>
+              <button 
+                onClick={() => setShowDonationModal(true)}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Heart className="w-4 h-4" />
+                <span>Make a Donation</span>
+              </button>
+            </div>
+
             {/* Career Progress Summary */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center space-x-2 mb-4">
@@ -600,6 +620,14 @@ export default function AlumniDashboard() {
           </div>
         </div>
       )}
+
+      {/* Donation Modal */}
+      <DonationModal
+        isOpen={showDonationModal}
+        onClose={() => setShowDonationModal(false)}
+        donorName={user?.name || 'Alumni'}
+        donorEmail={user?.email || ''}
+      />
     </div>
   )
 }
