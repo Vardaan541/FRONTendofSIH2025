@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useStore } from '@/lib/store'
-import Navigation from '@/components/Navigation'
 import { Search, Check, X, Clock, DollarSign, MessageCircle, User, Calendar } from 'lucide-react'
+import Navigation from '@/components/Navigation'
+import { useStore } from '@/lib/store'
+import { getTableDataClient } from '@/lib/supabase/client'
 
 interface Student {
   id: string
@@ -18,9 +19,9 @@ interface Student {
 
 interface SessionRequest {
   id: string
-  studentId: string
-  studentName: string
-  studentEmail: string
+  student_id: string
+  student_name: string
+  student_email: string
   hours: number
   amount: number
   status: 'pending' | 'accepted' | 'rejected'
@@ -37,79 +38,58 @@ export default function MyStudents() {
   const [requests, setRequests] = useState<SessionRequest[]>([])
 
   useEffect(() => {
-    // Allow access even without authentication for demo purposes
-    // if (!user || user.role !== 'alumni') {
-    //   router.push('/')
-    //   return
-    // }
+    const fetchData = async () => {
+    if (!user || user.role !== 'alumni') {
+      router.push('/')
+      return
+    }
 
     // Mock students data
-    const mockStudents: Student[] = [
-      {
-        id: '1',
-        name: 'John Student',
-        email: 'john.student@university.edu',
-        department: 'Computer Science',
-        graduationYear: 2025,
-        bio: 'Passionate about web development and machine learning. Looking to gain industry experience and mentorship.'
-      },
-      {
-        id: '2',
-        name: 'Sarah Wilson',
-        email: 'sarah.wilson@university.edu',
-        department: 'Computer Science',
-        graduationYear: 2024,
-        bio: 'Interested in product management and user experience design. Seeking guidance on career transition.'
-      },
-      {
-        id: '3',
-        name: 'Mike Johnson',
-        email: 'mike.johnson@university.edu',
-        department: 'Computer Science',
-        graduationYear: 2026,
-        bio: 'Full-stack developer with focus on React and Node.js. Want to learn about scaling applications.'
-      }
-    ]
+    const mockStudents: Student[] = await getTableDataClient("mock_students", (q) => q.select())
 
+    const mockRequests: SessionRequest[] = await getTableDataClient("session_requests", (q) => q.select()) 
     // Mock session requests
-    const mockRequests: SessionRequest[] = [
-      {
-        id: '1',
-        studentId: '1',
-        studentName: 'John Student',
-        studentEmail: 'john.student@university.edu',
-        hours: 2,
-        amount: 200,
-        status: 'pending',
-        message: 'Hi! I\'m really interested in learning about software architecture and system design. Could we discuss best practices and career growth in this area?',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
-      },
-      {
-        id: '2',
-        studentId: '2',
-        studentName: 'Sarah Wilson',
-        studentEmail: 'sarah.wilson@university.edu',
-        hours: 1,
-        amount: 100,
-        status: 'pending',
-        message: 'I\'m considering a career switch to product management. Would love to get your insights on the role and how to prepare for interviews.',
-        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
-      },
-      {
-        id: '3',
-        studentId: '3',
-        studentName: 'Mike Johnson',
-        studentEmail: 'mike.johnson@university.edu',
-        hours: 3,
-        amount: 300,
-        status: 'accepted',
-        message: 'Thank you for accepting my session request! Looking forward to our discussion about full-stack development.',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
-      }
-    ]
+    // const mockRequests: SessionRequest[] = [
+    //   {
+    //     id: '1',
+    //     studentId: '1',
+    //     studentName: 'John Student',
+    //     studentEmail: 'john.student@university.edu',
+    //     hours: 2,
+    //     amount: 200,
+    //     status: 'pending',
+    //     message: 'Hi! I\'m really interested in learning about software architecture and system design. Could we discuss best practices and career growth in this area?',
+    //     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+    //   },
+    //   {
+    //     id: '2',
+    //     studentId: '2',
+    //     studentName: 'Sarah Wilson',
+    //     studentEmail: 'sarah.wilson@university.edu',
+    //     hours: 1,
+    //     amount: 100,
+    //     status: 'pending',
+    //     message: 'I\'m considering a career switch to product management. Would love to get your insights on the role and how to prepare for interviews.',
+    //     timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
+    //   },
+    //   {
+    //     id: '3',
+    //     studentId: '3',
+    //     studentName: 'Mike Johnson',
+    //     studentEmail: 'mike.johnson@university.edu',
+    //     hours: 3,
+    //     amount: 300,
+    //     status: 'accepted',
+    //     message: 'Thank you for accepting my session request! Looking forward to our discussion about full-stack development.',
+    //     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
+    //   }
+    // ]
 
     setStudents(mockStudents)
     setRequests(mockRequests)
+  }
+
+  fetchData()
   }, [user, router])
 
   const handleAcceptRequest = (requestId: string) => {
@@ -126,10 +106,13 @@ export default function MyStudents() {
     ))
   }
 
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (dateInput: string | Date | null | undefined) => {
+    if (!dateInput) return ''
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
+    if (!(date instanceof Date) || isNaN(date.getTime())) return ''
     const now = new Date()
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
+
     if (diffInHours < 1) return 'Just now'
     if (diffInHours < 24) return `${diffInHours}h ago`
     const diffInDays = Math.floor(diffInHours / 24)
@@ -219,12 +202,12 @@ export default function MyStudents() {
                           <div className="flex items-center space-x-3 mb-3">
                             <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                               <span className="text-white font-medium">
-                                {request.studentName.charAt(0)}
+                                {request.student_name.charAt(0)}
                               </span>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900">{request.studentName}</h3>
-                              <p className="text-sm text-gray-600">{request.studentEmail}</p>
+                              <h3 className="font-semibold text-gray-900">{request.student_name}</h3>
+                              <p className="text-sm text-gray-600">{request.student_email}</p>
                             </div>
                           </div>
                           <p className="text-gray-700 mb-4">{request.message}</p>
@@ -276,12 +259,12 @@ export default function MyStudents() {
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                           <span className="text-white font-medium">
-                            {request.studentName.charAt(0)}
+                            {request.student_name.charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{request.studentName}</h3>
-                          <p className="text-sm text-gray-600">{request.studentEmail}</p>
+                          <h3 className="font-semibold text-gray-900">{request.student_name}</h3>
+                          <p className="text-sm text-gray-600">{request.student_email}</p>
                         </div>
                         <span className="ml-auto bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                           Accepted
@@ -318,12 +301,12 @@ export default function MyStudents() {
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
                           <span className="text-white font-medium">
-                            {request.studentName.charAt(0)}
+                            {request.student_name.charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{request.studentName}</h3>
-                          <p className="text-sm text-gray-600">{request.studentEmail}</p>
+                          <h3 className="font-semibold text-gray-900">{request.student_name}</h3>
+                          <p className="text-sm text-gray-600">{request.student_email}</p>
                         </div>
                         <span className="ml-auto bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
                           Rejected
