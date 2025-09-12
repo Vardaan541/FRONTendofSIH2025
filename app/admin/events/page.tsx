@@ -137,6 +137,36 @@ export default function EventsPage() {
         price: 50,
         organizer: 'Entrepreneurship Center',
         collegeId: 'EVT-2024-004'
+      },
+      {
+        id: '6',
+        title: 'Networking Mixer - Alumni Meetup',
+        description: 'Casual networking event for alumni to connect and share experiences. Approved from alumni request.',
+        date: '2024-04-20',
+        time: '19:00',
+        venue: 'Downtown Conference Center',
+        capacity: 50,
+        registered: 23,
+        status: 'upcoming',
+        type: 'networking',
+        price: 0,
+        organizer: 'Michael Chen (Alumni)',
+        collegeId: 'EVT-REQ-20240116'
+      },
+      {
+        id: '7',
+        title: 'Startup Pitch Night',
+        description: 'Alumni entrepreneurs showcase their startups and seek feedback from the community.',
+        date: '2024-05-10',
+        time: '18:30',
+        venue: 'Innovation Hub',
+        capacity: 100,
+        registered: 45,
+        status: 'upcoming',
+        type: 'conference',
+        price: 15,
+        organizer: 'Sarah Johnson (Alumni)',
+        collegeId: 'EVT-REQ-20240120'
       }
     ])
   }, [])

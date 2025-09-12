@@ -66,11 +66,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleLogout = () => {
     setUserMenuOpen(false)
-    clearAdminUser()
-    // Add a small delay to ensure the menu closes before redirect
-    setTimeout(() => {
-      router.push('/admin/login')
-    }, 100)
+    
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to sign out?')) {
+      // Clear admin user data
+      clearAdminUser()
+      
+      // Show loading state briefly
+      setIsLoading(true)
+      
+      // Add a small delay to ensure the menu closes and data is cleared before redirect
+      setTimeout(() => {
+        router.push('/admin/login')
+      }, 200)
+    }
   }
 
   const navigation = [
@@ -102,6 +111,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       current: pathname === '/admin/profile',
       description: 'Your admin profile'
     },
+    { 
+      name: 'Sign Out', 
+      href: '#', 
+      icon: LogOut, 
+      current: false,
+      description: 'Logout from admin panel',
+      isLogout: true
+    },
   ]
 
   const userManagement = [
@@ -128,6 +145,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: '/admin/approvals', 
       icon: CheckCircle,
       description: 'Pending approvals'
+    },
+    { 
+      name: 'Event Approvals', 
+      href: '/admin/event-approvals', 
+      icon: Calendar,
+      description: 'Event request approvals'
     },
   ]
 
@@ -258,41 +281,64 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {navigation.map((item, index) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300 ${
-                      item.current
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 hover:shadow-sm'
-                    }`}
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className={`p-2 rounded-xl transition-all duration-300 ${
-                      item.current 
-                        ? 'bg-white/20' 
-                        : 'bg-gray-100 group-hover:bg-blue-100'
-                    }`}>
-                      <item.icon className={`h-5 w-5 transition-all duration-300 ${
+                {navigation.map((item, index) => {
+                  if (item.isLogout) {
+                    return (
+                      <button
+                        key={item.name}
+                        onClick={handleLogout}
+                        className="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300 text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 hover:shadow-sm"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
+                        <div className="p-2 rounded-xl transition-all duration-300 bg-gray-100 group-hover:bg-red-100">
+                          <item.icon className="h-5 w-5 transition-all duration-300 text-gray-500 group-hover:text-red-600" />
+                        </div>
+                        <div className="ml-4 flex-1 text-left">
+                          <span className="font-semibold">{item.name}</span>
+                          <p className="text-xs mt-0.5 text-gray-500 group-hover:text-red-500">
+                            {item.description}
+                          </p>
+                        </div>
+                      </button>
+                    )
+                  }
+                  
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300 ${
+                        item.current
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
+                          : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 hover:shadow-sm'
+                      }`}
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className={`p-2 rounded-xl transition-all duration-300 ${
                         item.current 
-                          ? 'text-white' 
-                          : 'text-gray-500 group-hover:text-blue-600'
-                      }`} />
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <span className="font-semibold">{item.name}</span>
-                      <p className={`text-xs mt-0.5 ${
-                        item.current ? 'text-blue-100' : 'text-gray-500'
+                          ? 'bg-white/20' 
+                          : 'bg-gray-100 group-hover:bg-blue-100'
                       }`}>
-                        {item.description}
-                      </p>
-                    </div>
-                    {item.current && (
-                      <div className="absolute right-4 w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    )}
-                  </a>
-                ))}
+                        <item.icon className={`h-5 w-5 transition-all duration-300 ${
+                          item.current 
+                            ? 'text-white' 
+                            : 'text-gray-500 group-hover:text-blue-600'
+                        }`} />
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <span className="font-semibold">{item.name}</span>
+                        <p className={`text-xs mt-0.5 ${
+                          item.current ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {item.description}
+                        </p>
+                      </div>
+                      {item.current && (
+                        <div className="absolute right-4 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      )}
+                    </a>
+                  )
+                })}
               </div>
             </div>
 
@@ -350,6 +396,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </a>
                 ))}
               </div>
+            </div>
+
+            {/* Logout Section */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <button
+                onClick={handleLogout}
+                className="group flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-300"
+              >
+                <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-red-100 transition-all duration-300">
+                  <LogOut className="h-4 w-4 text-gray-400 group-hover:text-red-600" />
+                </div>
+                <div className="ml-4 flex-1">
+                  <span className="font-medium">Sign Out</span>
+                  <p className="text-xs text-gray-500 mt-0.5">Logout from admin panel</p>
+                </div>
+              </button>
             </div>
           </div>
         </nav>

@@ -64,6 +64,13 @@ export default function ApprovalsPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [selectedApproval, setSelectedApproval] = useState<ApprovalItem | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [showEventApprovalModal, setShowEventApprovalModal] = useState(false)
+  const [eventApprovalData, setEventApprovalData] = useState({
+    capacity: 50,
+    price: 0,
+    status: 'upcoming',
+    notes: ''
+  })
 
   useEffect(() => {
     // Mock approvals data
@@ -100,9 +107,37 @@ export default function ApprovalsPage() {
         details: {
           eventName: 'Tech Talk 2024',
           date: '2024-03-15',
+          time: '18:00',
           venue: 'University Auditorium',
           expectedAttendees: 200,
-          budget: 15000
+          budget: 15000,
+          type: 'conference',
+          contactEmail: 'sarah.johnson@email.com',
+          contactPhone: '+1 (555) 123-4567',
+          organizer: 'Sarah Johnson'
+        }
+      },
+      {
+        id: '6',
+        type: 'event',
+        title: 'Networking Mixer - Alumni Meetup',
+        description: 'Casual networking event for alumni to connect and share experiences',
+        submittedBy: 'Michael Chen',
+        submittedDate: '2024-01-16T10:30:00Z',
+        status: 'pending',
+        priority: 'medium',
+        collegeId: 'EVT-REQ-20240116',
+        details: {
+          eventName: 'Networking Mixer - Alumni Meetup',
+          date: '2024-04-20',
+          time: '19:00',
+          venue: 'Downtown Conference Center',
+          expectedAttendees: 50,
+          budget: 2500,
+          type: 'networking',
+          contactEmail: 'michael.chen@email.com',
+          contactPhone: '+1 (555) 234-5678',
+          organizer: 'Michael Chen'
         }
       },
       {
@@ -213,22 +248,104 @@ export default function ApprovalsPage() {
   }
 
   const handleApprove = (approvalId: string) => {
-    setApprovals(approvals.map(a => 
-      a.id === approvalId ? { ...a, status: 'approved' as const } : a
-    ))
-    alert('Item approved successfully!')
+    const approval = approvals.find(a => a.id === approvalId)
+    if (approval) {
+      setApprovals(approvals.map(a => 
+        a.id === approvalId ? { ...a, status: 'approved' as const } : a
+      ))
+      
+      if (approval.type === 'event') {
+        // Create the approved event in the events system
+        const eventData = {
+          id: `EVT-${Date.now()}`,
+          title: approval.details?.eventName || 'Approved Event',
+          description: approval.description,
+          date: approval.details?.date || '',
+          time: approval.details?.time || '',
+          venue: approval.details?.venue || '',
+          capacity: approval.details?.expectedAttendees || 50,
+          registered: 0,
+          status: 'upcoming' as const,
+          type: approval.details?.type || 'networking',
+          price: 0,
+          organizer: approval.details?.organizer || approval.submittedBy,
+          collegeId: approval.collegeId
+        }
+        
+        // In a real app, this would be sent to the backend to create the event
+        console.log('Creating approved event:', eventData)
+        
+        alert(`Event "${approval.details?.eventName}" has been approved and will be added to the events calendar!`)
+      } else {
+        alert('Item approved successfully!')
+      }
+    }
   }
 
   const handleReject = (approvalId: string) => {
-    setApprovals(approvals.map(a => 
-      a.id === approvalId ? { ...a, status: 'rejected' as const } : a
-    ))
-    alert('Item rejected.')
+    const approval = approvals.find(a => a.id === approvalId)
+    if (approval) {
+      setApprovals(approvals.map(a => 
+        a.id === approvalId ? { ...a, status: 'rejected' as const } : a
+      ))
+      
+      if (approval.type === 'event') {
+        alert(`Event "${approval.details?.eventName}" has been rejected.`)
+      } else {
+        alert('Item rejected.')
+      }
+    }
   }
 
   const handleViewDetails = (approval: ApprovalItem) => {
     setSelectedApproval(approval)
     setShowDetailModal(true)
+  }
+
+  const handleEventApproval = (approval: ApprovalItem) => {
+    setSelectedApproval(approval)
+    setEventApprovalData({
+      capacity: approval.details?.expectedAttendees || 50,
+      price: 0,
+      status: 'upcoming',
+      notes: ''
+    })
+    setShowEventApprovalModal(true)
+  }
+
+  const handleEventApprovalSubmit = () => {
+    if (!selectedApproval) return
+
+    // Create the approved event with admin modifications
+    const eventData = {
+      id: `EVT-${Date.now()}`,
+      title: selectedApproval.details?.eventName || 'Approved Event',
+      description: selectedApproval.description,
+      date: selectedApproval.details?.date || '',
+      time: selectedApproval.details?.time || '',
+      venue: selectedApproval.details?.venue || '',
+      capacity: eventApprovalData.capacity,
+      registered: 0,
+      status: eventApprovalData.status as 'upcoming' | 'ongoing' | 'completed' | 'cancelled',
+      type: selectedApproval.details?.type || 'networking',
+      price: eventApprovalData.price,
+      organizer: selectedApproval.details?.organizer || selectedApproval.submittedBy,
+      collegeId: selectedApproval.collegeId,
+      adminNotes: eventApprovalData.notes
+    }
+
+    // Update approval status
+    setApprovals(approvals.map(a => 
+      a.id === selectedApproval.id ? { ...a, status: 'approved' as const } : a
+    ))
+
+    // In a real app, this would be sent to the backend
+    console.log('Creating approved event with admin modifications:', eventData)
+
+    alert(`Event "${selectedApproval.details?.eventName}" has been approved and will be added to the events calendar!`)
+    
+    setShowEventApprovalModal(false)
+    setSelectedApproval(null)
   }
 
   const pendingCount = approvals.filter(a => a.status === 'pending').length
@@ -463,13 +580,23 @@ export default function ApprovalsPage() {
                       </button>
                       {approval.status === 'pending' && (
                         <>
-                          <button
-                            onClick={() => handleApprove(approval.id)}
-                            className="p-3 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-all duration-200"
-                            title="Approve"
-                          >
-                            <CheckCircle className="w-5 h-5" />
-                          </button>
+                          {approval.type === 'event' ? (
+                            <button
+                              onClick={() => handleEventApproval(approval)}
+                              className="p-3 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-all duration-200"
+                              title="Review & Approve Event"
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleApprove(approval.id)}
+                              className="p-3 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-all duration-200"
+                              title="Approve"
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleReject(approval.id)}
                             className="p-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-200"
@@ -546,9 +673,64 @@ export default function ApprovalsPage() {
                     <div>
                       <h4 className="text-lg font-semibold text-gray-900 mb-4">Details</h4>
                       <div className="bg-gray-50 rounded-xl p-6">
-                        <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {JSON.stringify(selectedApproval.details, null, 2)}
-                        </pre>
+                        {selectedApproval.type === 'event' ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <h5 className="font-semibold text-gray-900 mb-3">Event Information</h5>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Event Name</label>
+                                  <p className="text-gray-900">{selectedApproval.details.eventName}</p>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Date & Time</label>
+                                  <p className="text-gray-900">{selectedApproval.details.date} at {selectedApproval.details.time}</p>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Venue</label>
+                                  <p className="text-gray-900">{selectedApproval.details.venue}</p>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Event Type</label>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {selectedApproval.details.type}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <h5 className="font-semibold text-gray-900 mb-3">Event Details</h5>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Expected Attendees</label>
+                                  <p className="text-gray-900">{selectedApproval.details.expectedAttendees}</p>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Budget</label>
+                                  <p className="text-gray-900">${selectedApproval.details.budget?.toLocaleString() || 'Not specified'}</p>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Organizer</label>
+                                  <p className="text-gray-900">{selectedApproval.details.organizer}</p>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-600">Contact Email</label>
+                                  <p className="text-gray-900">{selectedApproval.details.contactEmail}</p>
+                                </div>
+                                {selectedApproval.details.contactPhone && (
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-600">Contact Phone</label>
+                                    <p className="text-gray-900">{selectedApproval.details.contactPhone}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {JSON.stringify(selectedApproval.details, null, 2)}
+                          </pre>
+                        )}
                       </div>
                     </div>
                   )}
@@ -585,6 +767,166 @@ export default function ApprovalsPage() {
                         className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
                       >
                         Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Event Approval Modal */}
+          {showEventApprovalModal && selectedApproval && (
+            <div className="fixed inset-0 bg-gray-600/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+              <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-2xl rounded-2xl bg-white/95 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-900">Review & Approve Event</h3>
+                  <button
+                    onClick={() => setShowEventApprovalModal(false)}
+                    className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Event Information Review */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Event Information</h4>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h5 className="font-semibold text-gray-900 mb-3">Event Details</h5>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Event Name</label>
+                              <p className="text-gray-900">{selectedApproval.details?.eventName}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Date & Time</label>
+                              <p className="text-gray-900">{selectedApproval.details?.date} at {selectedApproval.details?.time}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Venue</label>
+                              <p className="text-gray-900">{selectedApproval.details?.venue}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Event Type</label>
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {selectedApproval.details?.type}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <h5 className="font-semibold text-gray-900 mb-3">Organizer Information</h5>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Organizer</label>
+                              <p className="text-gray-900">{selectedApproval.details?.organizer}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Contact Email</label>
+                              <p className="text-gray-900">{selectedApproval.details?.contactEmail}</p>
+                            </div>
+                            {selectedApproval.details?.contactPhone && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-600">Contact Phone</label>
+                                <p className="text-gray-900">{selectedApproval.details?.contactPhone}</p>
+                              </div>
+                            )}
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Expected Attendees</label>
+                              <p className="text-gray-900">{selectedApproval.details?.expectedAttendees}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600">Budget</label>
+                              <p className="text-gray-900">${selectedApproval.details?.budget?.toLocaleString() || 'Not specified'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-600 mb-2">Description</label>
+                        <p className="text-gray-900 leading-relaxed">{selectedApproval.description}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Admin Modifications */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Admin Settings</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Event Capacity</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={eventApprovalData.capacity}
+                          onChange={(e) => setEventApprovalData(prev => ({ ...prev, capacity: parseInt(e.target.value) || 50 }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all duration-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Event Price ($)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={eventApprovalData.price}
+                          onChange={(e) => setEventApprovalData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all duration-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Event Status</label>
+                        <select
+                          value={eventApprovalData.status}
+                          onChange={(e) => setEventApprovalData(prev => ({ ...prev, status: e.target.value }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all duration-200"
+                        >
+                          <option value="upcoming">Upcoming</option>
+                          <option value="ongoing">Ongoing</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Admin Notes (Optional)</label>
+                      <textarea
+                        rows={3}
+                        value={eventApprovalData.notes}
+                        onChange={(e) => setEventApprovalData(prev => ({ ...prev, notes: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all duration-200"
+                        placeholder="Add any notes or modifications for this event..."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <div className="text-sm text-gray-500">
+                      This event will be added to the events calendar upon approval.
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => setShowEventApprovalModal(false)}
+                        className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => handleReject(selectedApproval.id)}
+                        className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      >
+                        Reject Event
+                      </button>
+                      <button
+                        onClick={handleEventApprovalSubmit}
+                        className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      >
+                        Approve Event
                       </button>
                     </div>
                   </div>
