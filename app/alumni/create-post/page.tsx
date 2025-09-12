@@ -18,10 +18,11 @@ export default function CreatePost() {
   const attachmentInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (!user || user.role !== 'alumni') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   router.push('/')
+    //   return
+    // }
   }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,8 +52,8 @@ export default function CreatePost() {
       // Simulate gaining followers when posting (random 1-3 followers)
       const newFollowers = Math.floor(Math.random() * 3) + 1
       if (user?.id) {
-        updateUserStats(user.id, {
-          followers: (user.followers || 0) + newFollowers
+        updateUserStats(user?.id, {
+          followers: (user?.followers || 0) + newFollowers
         })
       }
       
@@ -89,9 +90,10 @@ export default function CreatePost() {
 
   const emojis = ['😀', '😂', '😍', '🥰', '😎', '🤔', '👍', '👎', '❤️', '🔥', '💯', '🎉', '🚀', '💡', '⭐', '🎯']
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -117,12 +119,12 @@ export default function CreatePost() {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-medium">
-                    {user.name?.charAt(0)}
+                    {user?.name?.charAt(0) || 'A'}
                   </span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{user.name}</h3>
-                  <p className="text-sm text-gray-600">{user.currentPosition} at {user.company}</p>
+                  <h3 className="font-semibold text-gray-900">{user?.name || 'Alumni'}</h3>
+                  <p className="text-sm text-gray-600">{user?.currentPosition || 'Software Engineer'} at {user?.company || 'Tech Corp'}</p>
                 </div>
               </div>
             </div>

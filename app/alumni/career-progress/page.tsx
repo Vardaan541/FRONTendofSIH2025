@@ -34,15 +34,17 @@ export default function CareerProgress() {
   const [editItem, setEditItem] = useState<any>(null)
 
   useEffect(() => {
-    if (!user || user.role !== 'alumni') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   router.push('/')
+    //   return
+    // }
   }, [user, router])
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {

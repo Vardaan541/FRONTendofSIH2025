@@ -1,93 +1,52 @@
 'use client'
 
 import { useState } from 'react'
-import { Heart, X, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { X, Heart, CreditCard, Smartphone, Gift } from 'lucide-react'
 
 interface DonationModalProps {
   isOpen: boolean
   onClose: () => void
   donorName: string
-  donorEmail?: string
+  donorEmail: string
 }
 
-declare global {
-  interface Window {
-    Razorpay: any
-  }
-}
-
-export default function DonationModal({
-  isOpen,
-  onClose,
-  donorName,
-  donorEmail = ''
-}: DonationModalProps) {
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
+export default function DonationModal({ isOpen, onClose, donorName, donorEmail }: DonationModalProps) {
+  const [amount, setAmount] = useState('')
   const [customAmount, setCustomAmount] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending')
-  const [paymentId, setPaymentId] = useState('')
+  const [selectedAmount, setSelectedAmount] = useState('')
 
-  const predefinedAmounts = [100, 250, 500, 1000, 2500, 5000]
+  const predefinedAmounts = ['100', '250', '500', '1000', '2500', '5000']
 
-  const handleAmountSelect = (amount: number) => {
+  const handleAmountSelect = (amount: string) => {
     setSelectedAmount(amount)
+    setAmount(amount)
     setCustomAmount('')
   }
 
   const handleCustomAmountChange = (value: string) => {
-    // Validate input - only allow numbers and prevent extremely large values
-    const numericValue = value.replace(/[^0-9]/g, '')
-    const amount = parseFloat(numericValue)
-    
-    // Set maximum limit to prevent Razorpay errors
-    if (amount > 100000) {
-      return // Don't allow amounts over ₹1,00,000
-    }
-    
-    setCustomAmount(numericValue)
-    setSelectedAmount(null)
-  }
-
-  const getFinalAmount = () => {
-    if (selectedAmount) return selectedAmount
-    if (customAmount) return parseFloat(customAmount) || 0
-    return 0
-  }
-
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement('script')
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.onload = () => resolve(true)
-      script.onerror = () => resolve(false)
-      document.body.appendChild(script)
-    })
+    setCustomAmount(value)
+    setAmount(value)
+    setSelectedAmount('')
   }
 
   const handleDonate = async () => {
-    const amount = getFinalAmount()
-    if (amount < 10) {
-      alert('Minimum donation amount is ₹10')
-      return
-    }
-    if (amount > 100000) {
-      alert('Maximum donation amount is ₹1,00,000')
+    if (!amount || parseFloat(amount) < 10) {
+      alert('Please enter a valid amount (minimum ₹10)')
       return
     }
 
     setIsLoading(true)
-    setPaymentStatus('pending')
 
     try {
-      // Create order on backend
-      const orderResponse = await fetch('/api/donation', {
+      // Create donation order
+      const response = await fetch('/api/donation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount,
+          amount: parseFloat(amount),
           currency: 'INR',
           donorName,
           donorEmail,
@@ -95,267 +54,186 @@ export default function DonationModal({
         }),
       })
 
-      if (!orderResponse.ok) {
-        throw new Error('Failed to create donation order')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create donation order')
       }
 
-      const orderData = await orderResponse.json()
-
-      // Load Razorpay script
-      const scriptLoaded = await loadRazorpayScript()
-      if (!scriptLoaded) {
-        throw new Error('Failed to load Razorpay script')
-      }
-
+      // Initialize Razorpay
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RGKmqvsB0eeJ2c',
-        amount: amount * 100, // Razorpay expects amount in paise
-        currency: 'INR',
+        key: 'rzp_test_RGKmqvsB0eeJ2c',
+        amount: data.amount,
+        currency: data.currency,
         name: 'Alumni Mentoring Platform',
-        description: 'Donation to support the platform',
-        order_id: orderData.orderId,
+        description: 'Support our platform',
+        order_id: data.orderId,
+        handler: function (response: any) {
+          alert('Thank you for your donation! Your support helps us maintain and improve the platform.')
+          onClose()
+          setAmount('')
+          setCustomAmount('')
+          setSelectedAmount('')
+        },
         prefill: {
           name: donorName,
           email: donorEmail,
         },
         theme: {
-          color: '#EF4444' // Red theme for donations
+          color: '#3B82F6',
         },
-        handler: function (response: any) {
-          setPaymentId(response.razorpay_payment_id)
-          setPaymentStatus('success')
-          // Verify payment on backend
-          verifyPayment(orderData.orderId, response.razorpay_payment_id, response.razorpay_signature)
-        },
-        modal: {
-          ondismiss: function() {
-            setPaymentStatus('failed')
-          }
-        }
       }
 
-      const razorpay = new window.Razorpay(options)
+      const razorpay = new (window as any).Razorpay(options)
       razorpay.open()
+
     } catch (error) {
       console.error('Donation error:', error)
-      setPaymentStatus('failed')
+      alert('Failed to process donation. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const verifyPayment = async (orderId: string, paymentId: string, signature: string) => {
-    try {
-      await fetch('/api/donation', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId,
-          paymentId,
-          signature,
-          type: 'donation'
-        }),
-      })
-    } catch (error) {
-      console.error('Payment verification error:', error)
-    }
-  }
-
-  const resetModal = () => {
-    setSelectedAmount(null)
-    setCustomAmount('')
-    setPaymentStatus('pending')
-    setPaymentId('')
-    setIsLoading(false)
-  }
-
-  const handleClose = () => {
-    resetModal()
-    onClose()
-  }
-
   if (!isOpen) return null
 
-  if (paymentStatus === 'success') {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-md w-full p-6 text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Thank You for Your Donation!</h3>
-          <p className="text-gray-600 mb-4">
-            Your generous contribution of ₹{getFinalAmount()} will help support our platform and community.
-          </p>
-          {paymentId && (
-            <div className="bg-gray-50 p-4 rounded-md mb-4">
-              <p className="text-sm text-gray-600">
-                Payment ID: {paymentId}
-              </p>
-            </div>
-          )}
-          <button
-            onClick={handleClose}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (paymentStatus === 'failed') {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-md w-full p-6 text-center">
-          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Donation Failed</h3>
-          <p className="text-gray-600 mb-4">
-            There was an issue processing your donation. Please try again.
-          </p>
-          <div className="flex space-x-4">
-            <button
-              onClick={handleClose}
-              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => setPaymentStatus('pending')}
-              className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
-            <Heart className="w-6 h-6 text-red-500" />
-            <h3 className="text-xl font-bold text-gray-900">Support Our Platform</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <Heart className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Support Our Platform</h2>
+              <p className="text-sm text-gray-600">Help us maintain and improve the alumni mentoring platform</p>
+            </div>
           </div>
           <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all duration-200"
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="mb-6">
-          <p className="text-gray-600 mb-4">
-            Your donation helps us maintain and improve the alumni mentoring platform, 
-            connecting students with experienced professionals.
-          </p>
-          
-          <div className="mb-4">
+        {/* Content */}
+        <div className="p-6">
+          {/* Donation Amount */}
+          <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Select Donation Amount
             </label>
+            
+            {/* Predefined Amounts */}
             <div className="grid grid-cols-3 gap-3 mb-4">
               {predefinedAmounts.map((amount) => (
                 <button
                   key={amount}
                   onClick={() => handleAmountSelect(amount)}
-                  className={`p-4 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 ${
+                  className={`p-3 border-2 rounded-lg text-center transition-all duration-200 ${
                     selectedAmount === amount
-                      ? 'border-red-500 bg-red-100 text-red-700 shadow-lg'
-                      : 'border-gray-200 hover:border-red-300 hover:bg-red-50 hover:shadow-md'
+                      ? 'border-red-500 bg-red-50 text-red-700'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
                   }`}
                 >
-                  <span className="font-bold text-lg">₹{amount.toLocaleString()}</span>
+                  <div className="font-semibold">₹{amount}</div>
                 </button>
               ))}
             </div>
-          </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Or enter custom amount
-            </label>
+            {/* Custom Amount */}
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₹</span>
               <input
                 type="number"
-                min="10"
-                step="1"
                 value={customAmount}
                 onChange={(e) => handleCustomAmountChange(e.target.value)}
-                placeholder="Enter amount (e.g., 100)"
-                className="w-full pl-8 pr-12 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 text-gray-900 font-medium focus:bg-red-50"
-                style={{ fontSize: '16px' }}
+                placeholder="Enter custom amount"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                min="10"
               />
-              {customAmount && (
-                <button
-                  onClick={() => setCustomAmount('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                  type="button"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">Minimum amount: ₹10 • Maximum amount: ₹1,00,000</p>
-            {customAmount && (
-              <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-                <p className="text-sm text-blue-700 font-medium">
-                  💰 You entered: ₹{parseFloat(customAmount).toLocaleString()}
-                </p>
-                {parseFloat(customAmount) >= 1000 && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ✨ Generous donation! Thank you!
-                  </p>
-                )}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                <span className="text-gray-500 text-sm">₹</span>
               </div>
-            )}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Minimum donation amount is ₹10</p>
           </div>
 
-          {getFinalAmount() > 0 && (
-            <div className="bg-gradient-to-r from-red-50 to-pink-50 p-4 rounded-lg mb-4 border-2 border-red-200">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-900 text-lg">Total Donation:</span>
-                <span className="text-2xl font-bold text-red-600">₹{getFinalAmount().toLocaleString()}</span>
+          {/* Donor Info */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-medium text-gray-900 mb-2">Donor Information</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Name:</span>
+                <span className="text-gray-900">{donorName}</span>
               </div>
-              {getFinalAmount() >= 1000 && (
-                <p className="text-sm text-green-600 mt-2 font-medium">
-                  🎉 Thank you for your generous donation!
-                </p>
-              )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Email:</span>
+                <span className="text-gray-900">{donorEmail || 'Not provided'}</span>
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Payment Methods */}
+          <div className="mb-6">
+            <h3 className="font-medium text-gray-900 mb-3">Payment Methods</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <CreditCard className="w-5 h-5 text-blue-500" />
+                <span className="text-sm text-gray-700">Credit/Debit Card</span>
+              </div>
+              <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <Smartphone className="w-5 h-5 text-green-500" />
+                <span className="text-sm text-gray-700">UPI, Net Banking, Wallets</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Donation Impact */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-100">
+            <div className="flex items-center space-x-2 mb-2">
+              <Gift className="w-5 h-5 text-red-500" />
+              <h3 className="font-medium text-gray-900">Your Impact</h3>
+            </div>
+            <p className="text-sm text-gray-600">
+              Your donation helps us maintain server costs, develop new features, and provide 
+              better support to students and alumni using our platform.
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-          <button
-            onClick={handleClose}
-            className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleDonate}
-            disabled={getFinalAmount() < 10 || isLoading}
-            className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <Heart className="w-4 h-4" />
-                <span>Donate ₹{getFinalAmount().toLocaleString()}</span>
-              </>
-            )}
-          </button>
+        {/* Footer */}
+        <div className="flex items-center justify-between p-6 border-t bg-gray-50">
+          <div className="text-sm text-gray-500">
+            Secure payment powered by Razorpay
+          </div>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDonate}
+              disabled={!amount || parseFloat(amount) < 10 || isLoading}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <Heart className="w-4 h-4" />
+                  <span>Donate ₹{amount || '0'}</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

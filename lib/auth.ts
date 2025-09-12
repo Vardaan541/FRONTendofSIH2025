@@ -47,3 +47,13 @@ export const clearAdminUser = (): void => {
 export const isAdminAuthenticated = (): boolean => {
   return getAdminUser() !== null
 }
+
+export const isDeveloperAuthenticated = (): boolean => {
+  const user = getAdminUser()
+  return user !== null && user.role === 'developer'
+}
+
+export const isAdminOrDeveloperAuthenticated = (): boolean => {
+  const user = getAdminUser()
+  return user !== null && (user.role === 'admin' || user.role === 'developer')
+}

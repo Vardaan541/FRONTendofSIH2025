@@ -40,10 +40,11 @@ export default function EventRequestsPage() {
   })
 
   useEffect(() => {
-    if (!user || user.role !== 'alumni') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   router.push('/')
+    //   return
+    // }
   }, [user, router])
 
   const showNotificationMessage = (message: string) => {
@@ -141,9 +142,10 @@ export default function EventRequestsPage() {
     request.submittedBy === user?.name || request.details.organizer === user?.name
   )
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   const pendingCount = eventRequests.filter(r => r.status === 'pending').length
   const approvedCount = eventRequests.filter(r => r.status === 'approved').length

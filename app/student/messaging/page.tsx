@@ -13,19 +13,21 @@ export default function StudentMessaging() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'student') {
+    //   router.push('/')
+    //   return
+    // }
   }, [user, router])
 
   const handleChatSelect = (chat: Chat) => {
     setSelectedChat(chat)
   }
 
-  if (!user || user.role !== 'student') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'student') {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">

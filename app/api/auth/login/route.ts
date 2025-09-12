@@ -55,6 +55,20 @@ const users: any[] = [
     following: 0,
     createdAt: new Date().toISOString(),
     isActive: true
+  },
+  {
+    id: 'demo_dev_1',
+    name: 'Developer User',
+    email: 'dev@university.edu',
+    password: 'dev123',
+    phone: '+1234567893',
+    department: 'Development',
+    bio: 'Platform Developer with full access',
+    role: 'developer',
+    followers: 0,
+    following: 0,
+    createdAt: new Date().toISOString(),
+    isActive: true
   }
 ]
 

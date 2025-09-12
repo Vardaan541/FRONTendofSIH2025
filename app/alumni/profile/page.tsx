@@ -25,19 +25,20 @@ export default function AlumniProfile() {
   })
 
   useEffect(() => {
-    if (!user || user.role !== 'alumni') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   router.push('/')
+    //   return
+    // }
 
     setFormData({
-      name: user.name || '',
-      email: user.email || '',
-      bio: user.bio || '',
-      department: user.department || '',
-      graduationYear: user.graduationYear?.toString() || '',
-      currentPosition: user.currentPosition || '',
-      company: user.company || '',
+      name: user?.name || '',
+      email: user?.email || '',
+      bio: user?.bio || '',
+      department: user?.department || '',
+      graduationYear: user?.graduationYear?.toString() || '',
+      currentPosition: user?.currentPosition || '',
+      company: user?.company || '',
       location: '',
       hourlyRate: '100',
       linkedin: '',
@@ -53,7 +54,7 @@ export default function AlumniProfile() {
         email: formData.email,
         bio: formData.bio,
         department: formData.department,
-        graduationYear: parseInt(formData.graduationYear) || user.graduationYear,
+        graduationYear: parseInt(formData.graduationYear) || user?.graduationYear,
         currentPosition: formData.currentPosition,
         company: formData.company
       }
@@ -65,13 +66,13 @@ export default function AlumniProfile() {
   const handleCancel = () => {
     if (user) {
       setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        bio: user.bio || '',
-        department: user.department || '',
-        graduationYear: user.graduationYear?.toString() || '',
-        currentPosition: user.currentPosition || '',
-        company: user.company || '',
+        name: user?.name || '',
+        email: user?.email || '',
+        bio: user?.bio || '',
+        department: user?.department || '',
+        graduationYear: user?.graduationYear?.toString() || '',
+        currentPosition: user?.currentPosition || '',
+        company: user?.company || '',
         location: '',
         hourlyRate: '100',
         linkedin: '',
@@ -81,9 +82,10 @@ export default function AlumniProfile() {
     setIsEditing(false)
   }
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -97,13 +99,13 @@ export default function AlumniProfile() {
               <div className="flex items-center space-x-6">
                 <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
                   <span className="text-3xl font-bold text-green-600">
-                    {user.name?.charAt(0)}
+                    {user?.name?.charAt(0) || 'A'}
                   </span>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-white">{user.name}</h1>
-                  <p className="text-green-100 text-lg">{user.currentPosition || 'Software Engineer'}</p>
-                  <p className="text-green-200">{user.company} • Class of {user.graduationYear}</p>
+                  <h1 className="text-3xl font-bold text-white">{user?.name || 'Alumni'}</h1>
+                  <p className="text-green-100 text-lg">{user?.currentPosition || 'Software Engineer'}</p>
+                  <p className="text-green-200">{user?.company || 'Tech Corp'} • Class of {user?.graduationYear || '2020'}</p>
                 </div>
               </div>
               <button
@@ -223,7 +225,7 @@ export default function AlumniProfile() {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">About</h2>
                   <p className="text-gray-700 leading-relaxed">
-                    {user.bio || 'Experienced software engineer passionate about mentoring the next generation of developers. I love sharing insights about career growth, technical challenges, and industry trends.'}
+                    {user?.bio || 'Experienced software engineer passionate about mentoring the next generation of developers. I love sharing insights about career growth, technical challenges, and industry trends.'}
                   </p>
                 </div>
 
@@ -235,14 +237,14 @@ export default function AlumniProfile() {
                       <Building className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm text-gray-600">Current Position</p>
-                        <p className="font-medium text-gray-900">{user.currentPosition || 'Software Engineer'}</p>
+                        <p className="font-medium text-gray-900">{user?.currentPosition || 'Software Engineer'}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Building className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm text-gray-600">Company</p>
-                        <p className="font-medium text-gray-900">{user.company || 'Tech Corp'}</p>
+                        <p className="font-medium text-gray-900">{user?.company || 'Tech Corp'}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -269,11 +271,11 @@ export default function AlumniProfile() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-600">Department</p>
-                        <p className="font-medium text-gray-900">{user.department}</p>
+                        <p className="font-medium text-gray-900">{user?.department || 'Computer Science'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Graduation Year</p>
-                        <p className="font-medium text-gray-900">{user.graduationYear}</p>
+                        <p className="font-medium text-gray-900">{user?.graduationYear || '2020'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Degree</p>
@@ -292,7 +294,7 @@ export default function AlumniProfile() {
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">Mentoring Statistics</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-blue-50 rounded-lg p-4 text-center">
-                      <p className="text-2xl font-bold text-blue-600">{user.followers || 0}</p>
+                      <p className="text-2xl font-bold text-blue-600">{user?.followers || 0}</p>
                       <p className="text-blue-800">Followers</p>
                     </div>
                     <div className="bg-green-50 rounded-lg p-4 text-center">

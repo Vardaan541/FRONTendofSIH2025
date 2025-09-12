@@ -27,10 +27,11 @@ export default function AlumniLeaderboard() {
   const [sortBy, setSortBy] = useState<'followers' | 'rating' | 'sessions'>('followers')
 
   useEffect(() => {
-    if (!user || user.role !== 'alumni') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   router.push('/')
+    //   return
+    // }
 
     // Mock leaderboard data
     const mockData: LeaderboardEntry[] = [
@@ -176,9 +177,10 @@ export default function AlumniLeaderboard() {
     }
   })
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">

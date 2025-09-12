@@ -37,10 +37,11 @@ export default function MyStudents() {
   const [requests, setRequests] = useState<SessionRequest[]>([])
 
   useEffect(() => {
-    if (!user || user.role !== 'alumni') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   router.push('/')
+    //   return
+    // }
 
     // Mock students data
     const mockStudents: Student[] = [
@@ -144,9 +145,10 @@ export default function MyStudents() {
   const acceptedRequests = requests.filter(req => req.status === 'accepted')
   const rejectedRequests = requests.filter(req => req.status === 'rejected')
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -36,11 +36,12 @@ export default function AlumniDashboard() {
 
   useEffect(() => {
     console.log('Alumni dashboard - user:', user) // Debug log
-    if (!user || user.role !== 'alumni') {
-      console.log('Redirecting to home - user not found or not alumni') // Debug log
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'alumni') {
+    //   console.log('Redirecting to home - user not found or not alumni') // Debug log
+    //   router.push('/')
+    //   return
+    // }
 
     // Initialize with some mock posts
     if (posts.length === 0) {
@@ -83,9 +84,10 @@ export default function AlumniDashboard() {
     }
   }, [user, router, posts.length])
 
-  if (!user || user.role !== 'alumni') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'alumni') {
+  //   return null
+  // }
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date()
@@ -292,7 +294,7 @@ export default function AlumniDashboard() {
           <div className="space-y-6">
             {/* Welcome Card */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome back, {user.name}!</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome back, {user?.name || 'Alumni'}!</h3>
               <p className="text-gray-600 mb-4">Share your expertise and help students grow</p>
               <div className="space-y-2">
                 <button 
@@ -333,19 +335,19 @@ export default function AlumniDashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Followers</span>
-                  <span className="font-medium text-gray-900">{user.followers || 0}</span>
+                  <span className="font-medium text-gray-900">{user?.followers || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Posts Created</span>
                   <span className="font-medium text-gray-900">
-                    {posts.filter(post => post.authorId === user.id).length}
+                    {posts.filter(post => post.authorId === user?.id).length}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Likes</span>
                   <span className="font-medium text-gray-900">
                     {posts
-                      .filter(post => post.authorId === user.id)
+                      .filter(post => post.authorId === user?.id)
                       .reduce((total, post) => total + post.likes, 0)}
                   </span>
                 </div>
@@ -354,7 +356,7 @@ export default function AlumniDashboard() {
                   <span className="font-medium text-gray-900">
                     {comments
                       .filter(comment => 
-                        posts.some(post => post.id === comment.postId && post.authorId === user.id)
+                        posts.some(post => post.id === comment.postId && post.authorId === user?.id)
                       ).length}
                   </span>
                 </div>

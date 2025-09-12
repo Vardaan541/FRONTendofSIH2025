@@ -23,11 +23,12 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     console.log('Student dashboard - user:', user) // Debug log
-    if (!user || user.role !== 'student') {
-      console.log('Redirecting to home - user not found or not student') // Debug log
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'student') {
+    //   console.log('Redirecting to home - user not found or not student') // Debug log
+    //   router.push('/')
+    //   return
+    // }
 
     // Initialize with some mock posts
     if (posts.length === 0) {
@@ -70,9 +71,10 @@ export default function StudentDashboard() {
     }
   }, [user, router, posts.length])
 
-  if (!user || user.role !== 'student') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'student') {
+  //   return null
+  // }
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date()
@@ -205,7 +207,7 @@ export default function StudentDashboard() {
           <div className="space-y-6">
             {/* Welcome Card */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome back, {user.name}!</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome back, {user?.name || 'Student'}!</h3>
               <p className="text-gray-600 mb-4">Ready to connect with alumni and grow your network?</p>
               <div className="space-y-2">
                 <button 
@@ -283,7 +285,7 @@ export default function StudentDashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Following</span>
-                  <span className="font-medium text-gray-900">{user.following || 0}</span>
+                  <span className="font-medium text-gray-900">{user?.following || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Sessions Booked</span>

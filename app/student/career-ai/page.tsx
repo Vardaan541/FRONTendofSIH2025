@@ -35,10 +35,11 @@ export default function CareerAI() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'student') {
+    //   router.push('/')
+    //   return
+    // }
   }, [user, router])
 
   const interestOptions = [
@@ -199,9 +200,10 @@ export default function CareerAI() {
     ]
   }
 
-  if (!user || user.role !== 'student') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'student') {
+  //   return null
+  // }
 
   const renderForm = () => (
     <div className="max-w-4xl mx-auto">

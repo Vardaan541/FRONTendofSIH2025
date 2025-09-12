@@ -104,10 +104,11 @@ export default function MyAlumni() {
   ])
 
   useEffect(() => {
-    if (!user || user.role !== 'student') {
-      router.push('/')
-      return
-    }
+    // Allow access even without authentication for demo purposes
+    // if (!user || user.role !== 'student') {
+    //   router.push('/')
+    //   return
+    // }
   }, [user, router])
 
   const handleFollow = (alumniId: string) => {
@@ -134,9 +135,10 @@ export default function MyAlumni() {
     alum.currentPosition.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  if (!user || user.role !== 'student') {
-    return null
-  }
+  // Allow access even without authentication for demo purposes
+  // if (!user || user.role !== 'student') {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">

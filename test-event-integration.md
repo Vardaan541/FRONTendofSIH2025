@@ -115,3 +115,4 @@ interface EventRequest {
 - In production, this would connect to a backend API
 - The system supports multiple event types and priorities
 - Admin can modify event details during approval process
+

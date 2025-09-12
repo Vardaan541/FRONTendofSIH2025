@@ -12,17 +12,23 @@ type AppState = 'role-selection' | 'login' | 'signup' | 'loading' | 'dashboard'
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('role-selection')
-  const [selectedRole, setSelectedRole] = useState<'student' | 'alumni' | 'admin' | null>(null)
+  const [selectedRole, setSelectedRole] = useState<'student' | 'alumni' | 'admin' | 'developer' | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { setUser } = useStore()
 
-  const handleRoleSelection = (role: 'student' | 'alumni' | 'admin') => {
+  const handleRoleSelection = (role: 'student' | 'alumni' | 'admin' | 'developer') => {
     console.log('Role selected:', role) // Debug log
     
     if (role === 'admin') {
       // Redirect directly to admin login page
       router.push('/admin/login')
+      return
+    }
+    
+    if (role === 'developer') {
+      // Redirect directly to developer login page
+      router.push('/developer/login')
       return
     }
     
@@ -169,7 +175,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Student Role */}
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
             <div className="text-center">
@@ -241,6 +247,26 @@ export default function Home() {
                 className="w-full flex items-center justify-center text-purple-600 font-semibold py-2 px-4 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
               >
                 Admin Portal
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
+          </div>
+
+          {/* Developer Role */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+            <div className="text-center">
+              <div className="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-10 h-10 text-orange-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Developer</h3>
+              <p className="text-gray-600 mb-6">
+                Full platform access for development, testing, and debugging all features
+              </p>
+              <button
+                onClick={() => handleRoleSelection('developer')}
+                className="w-full flex items-center justify-center text-orange-600 font-semibold py-2 px-4 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+              >
+                Developer Portal
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
             </div>
