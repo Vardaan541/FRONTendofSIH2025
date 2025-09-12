@@ -19,6 +19,13 @@ export default function Home() {
 
   const handleRoleSelection = (role: 'student' | 'alumni' | 'admin') => {
     console.log('Role selected:', role) // Debug log
+    
+    if (role === 'admin') {
+      // Redirect directly to admin login page
+      router.push('/admin/login')
+      return
+    }
+    
     setSelectedRole(role)
     setAppState('login')
   }
@@ -220,10 +227,7 @@ export default function Home() {
           </div>
 
           {/* Admin Role */}
-          <div 
-            className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2"
-            onClick={() => handleRoleSelection('admin')}
-          >
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
             <div className="text-center">
               <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Shield className="w-10 h-10 text-purple-600" />
@@ -232,10 +236,13 @@ export default function Home() {
               <p className="text-gray-600 mb-6">
                 Manage platform settings, moderate content, and oversee user interactions
               </p>
-              <div className="flex items-center justify-center text-purple-600 font-semibold">
-                Sign In as Admin
+              <button
+                onClick={() => handleRoleSelection('admin')}
+                className="w-full flex items-center justify-center text-purple-600 font-semibold py-2 px-4 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
+              >
+                Admin Portal
                 <ArrowRight className="w-5 h-5 ml-2" />
-              </div>
+              </button>
             </div>
           </div>
         </div>

@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
+import CommentModal from '@/components/CommentModal'
 import { FileText, Trophy, Users, MessageCircle, Heart, Share2, Plus, TrendingUp } from 'lucide-react'
 
 export default function AlumniDashboard() {
-  const { user, posts, setUser } = useStore()
+  const { user, posts, setUser, updatePost, comments } = useStore()
   const router = useRouter()
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [leaderboard, setLeaderboard] = useState([
     { id: '1', name: 'Sarah Johnson', followers: 250, position: 'Senior Software Engineer', company: 'Google' },
     { id: '2', name: 'Michael Chen', followers: 200, position: 'Product Manager', company: 'Microsoft' },
@@ -80,6 +82,21 @@ export default function AlumniDashboard() {
     return `${diffInDays}d ago`
   }
 
+  const handleLike = (postId: string) => {
+    const post = posts.find(p => p.id === postId)
+    if (post) {
+      updatePost(postId, { likes: post.likes + 1 })
+    }
+  }
+
+  const handleComment = (postId: string) => {
+    setSelectedPostId(postId)
+  }
+
+  const handleCloseCommentModal = () => {
+    setSelectedPostId(null)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation userRole="alumni" />
@@ -122,14 +139,57 @@ export default function AlumniDashboard() {
                           <span className="text-gray-500 text-sm">{formatTimeAgo(post.timestamp)}</span>
                         </div>
                         <p className="text-gray-800 mb-4">{post.content}</p>
+                        
+                        {/* Post Image */}
+                        {post.imageUrl && (
+                          <div className="mb-4">
+                            <img 
+                              src={post.imageUrl} 
+                              alt="Post image" 
+                              className="max-w-full h-auto rounded-lg shadow-sm"
+                              style={{ maxHeight: '400px' }}
+                            />
+                          </div>
+                        )}
+                        
+                        {/* Post Attachment */}
+                        {post.attachmentUrl && post.attachmentName && (
+                          <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">{post.attachmentName}</p>
+                                <p className="text-xs text-gray-500">Attachment</p>
+                              </div>
+                              <a 
+                                href={post.attachmentUrl} 
+                                download={post.attachmentName}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                              >
+                                Download
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                        
                         <div className="flex items-center space-x-6 text-gray-500">
-                          <button className="flex items-center space-x-2 hover:text-red-500 transition-colors">
+                          <button 
+                            onClick={() => handleLike(post.id)}
+                            className="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                          >
                             <Heart className="w-5 h-5" />
                             <span>{post.likes}</span>
                           </button>
-                          <button className="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                          <button 
+                            onClick={() => handleComment(post.id)}
+                            className="flex items-center space-x-2 hover:text-blue-500 transition-colors"
+                          >
                             <MessageCircle className="w-5 h-5" />
-                            <span>{post.comments}</span>
+                            <span>{comments.filter(c => c.postId === post.id).length}</span>
                           </button>
                           <button className="flex items-center space-x-2 hover:text-green-500 transition-colors">
                             <Share2 className="w-5 h-5" />
@@ -178,7 +238,7 @@ export default function AlumniDashboard() {
               </div>
             </div>
 
-            {/* Your Stats */}
+            {/* Your Impact */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
@@ -190,16 +250,27 @@ export default function AlumniDashboard() {
                   <span className="font-medium text-gray-900">{user.followers || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Sessions Completed</span>
-                  <span className="font-medium text-gray-900">0</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-gray-600">Posts Created</span>
-                  <span className="font-medium text-gray-900">0</span>
+                  <span className="font-medium text-gray-900">
+                    {posts.filter(post => post.authorId === user.id).length}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Students Helped</span>
-                  <span className="font-medium text-gray-900">0</span>
+                  <span className="text-gray-600">Total Likes</span>
+                  <span className="font-medium text-gray-900">
+                    {posts
+                      .filter(post => post.authorId === user.id)
+                      .reduce((total, post) => total + post.likes, 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Comments</span>
+                  <span className="font-medium text-gray-900">
+                    {comments
+                      .filter(comment => 
+                        posts.some(post => post.id === comment.postId && post.authorId === user.id)
+                      ).length}
+                  </span>
                 </div>
               </div>
             </div>
@@ -242,6 +313,13 @@ export default function AlumniDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Comment Modal */}
+      <CommentModal
+        postId={selectedPostId || ''}
+        isOpen={selectedPostId !== null}
+        onClose={handleCloseCommentModal}
+      />
     </div>
   )
 }

@@ -24,6 +24,23 @@ export interface Post {
   timestamp: Date
   likes: number
   comments: number
+  imageUrl?: string
+  attachmentUrl?: string
+  attachmentName?: string
+}
+
+export interface Comment {
+  id: string
+  postId: string
+  authorId: string
+  authorName: string
+  authorImage?: string
+  content: string
+  timestamp: Date
+  likes: number
+  imageUrl?: string
+  attachmentUrl?: string
+  attachmentName?: string
 }
 
 export interface SessionRequest {
@@ -69,11 +86,15 @@ export interface Chat {
 interface AppState {
   user: User | null
   posts: Post[]
+  comments: Comment[]
   sessionRequests: SessionRequest[]
   chats: Chat[]
   messages: Message[]
   setUser: (user: User | null) => void
   addPost: (post: Post) => void
+  updatePost: (id: string, updates: Partial<Post>) => void
+  addComment: (comment: Comment) => void
+  updateComment: (id: string, updates: Partial<Comment>) => void
   addSessionRequest: (request: SessionRequest) => void
   updateSessionRequest: (id: string, status: 'accepted' | 'rejected') => void
   addChat: (chat: Chat) => void
@@ -83,6 +104,7 @@ interface AppState {
   markChatAsRead: (chatId: string) => void
   toggleChatPin: (chatId: string) => void
   toggleChatFavorite: (chatId: string) => void
+  updateUserStats: (userId: string, updates: Partial<User>) => void
 }
 
 // Sample data for demonstration
@@ -218,11 +240,25 @@ const sampleMessages: Message[] = [
 export const useStore = create<AppState>((set) => ({
   user: null,
   posts: [],
+  comments: [],
   sessionRequests: [],
   chats: sampleChats,
   messages: sampleMessages,
   setUser: (user) => set({ user }),
   addPost: (post) => set((state) => ({ posts: [post, ...state.posts] })),
+  updatePost: (id, updates) => set((state) => ({
+    posts: state.posts.map(post => 
+      post.id === id ? { ...post, ...updates } : post
+    )
+  })),
+  addComment: (comment) => set((state) => ({ 
+    comments: [comment, ...state.comments] 
+  })),
+  updateComment: (id, updates) => set((state) => ({
+    comments: state.comments.map(comment => 
+      comment.id === id ? { ...comment, ...updates } : comment
+    )
+  })),
   addSessionRequest: (request) => set((state) => ({ 
     sessionRequests: [request, ...state.sessionRequests] 
   })),
@@ -259,5 +295,8 @@ export const useStore = create<AppState>((set) => ({
     chats: state.chats.map(chat => 
       chat.id === chatId ? { ...chat, isFavorite: !chat.isFavorite } : chat
     )
+  })),
+  updateUserStats: (userId, updates) => set((state) => ({
+    user: state.user?.id === userId ? { ...state.user, ...updates } : state.user
   }))
 }))

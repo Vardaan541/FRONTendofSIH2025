@@ -70,4 +70,353 @@ body {
   .select-enhanced:focus {
     @apply shadow-lg;
   }
+
+  /* Admin Dashboard Specific Styles */
+  .admin-card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 
+           hover:shadow-md transition-shadow duration-200;
+  }
+
+  .admin-button {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .admin-button-primary {
+    @apply admin-button bg-blue-600 text-white hover:bg-blue-700 
+           focus:ring-blue-500 shadow-lg hover:shadow-xl;
+  }
+
+  .admin-button-secondary {
+    @apply admin-button bg-gray-100 text-gray-700 hover:bg-gray-200 
+           focus:ring-gray-500 border border-gray-300;
+  }
+
+  .admin-button-danger {
+    @apply admin-button bg-red-600 text-white hover:bg-red-700 
+           focus:ring-red-500 shadow-lg hover:shadow-xl;
+  }
+
+  .admin-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 
+           focus:border-blue-500 transition-colors duration-200;
+  }
+
+  .admin-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg 
+           bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 
+           focus:border-blue-500 transition-colors duration-200;
+  }
+
+  .admin-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 
+           focus:border-blue-500 transition-colors duration-200 resize-none;
+  }
+
+  /* Responsive Design Utilities */
+  .mobile-hidden {
+    @apply hidden md:block;
+  }
+
+  .desktop-hidden {
+    @apply block md:hidden;
+  }
+
+  .tablet-hidden {
+    @apply hidden lg:block;
+  }
+
+  /* Accessibility Improvements */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden 
+           whitespace-nowrap border-0;
+  }
+
+  .focus-visible {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 
+           focus:ring-offset-2;
+  }
+
+  /* Animation Classes */
+  .fade-in {
+    @apply animate-in fade-in duration-300;
+  }
+
+  .slide-in {
+    @apply animate-in slide-in-from-bottom-4 duration-300;
+  }
+
+  /* Loading States */
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Status Indicators */
+  .status-indicator {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @apply status-indicator bg-green-100 text-green-800;
+  }
+
+  .status-warning {
+    @apply status-indicator bg-yellow-100 text-yellow-800;
+  }
+
+  .status-error {
+    @apply status-indicator bg-red-100 text-red-800;
+  }
+
+  .status-info {
+    @apply status-indicator bg-blue-100 text-blue-800;
+  }
+
+  /* Mobile-First Responsive Grid */
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+
+  .responsive-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .responsive-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .responsive-grid-4 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  /* Table Responsive */
+  .table-responsive {
+    @apply overflow-x-auto shadow ring-1 ring-black ring-opacity-5 rounded-lg;
+  }
+
+  .table-responsive table {
+    @apply min-w-full divide-y divide-gray-300;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    @apply fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50;
+  }
+
+  .modal-content {
+    @apply relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 
+           shadow-lg rounded-md bg-white;
+  }
+
+  /* Form Styles */
+  .form-group {
+    @apply space-y-2;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  .form-error {
+    @apply text-sm text-red-600;
+  }
+
+  .form-help {
+    @apply text-sm text-gray-500;
+  }
+
+  /* Navigation Styles */
+  .nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg 
+           transition-colors duration-200;
+  }
+
+  .nav-item-active {
+    @apply nav-item bg-blue-50 text-blue-700 border-r-2 border-blue-700;
+  }
+
+  .nav-item-inactive {
+    @apply nav-item text-gray-700 hover:bg-gray-50 hover:text-gray-900;
+  }
+
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200 bg-gray-50;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200 bg-gray-50;
+  }
+
+  /* Enhanced Dashboard Styles */
+  .dashboard-card {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 
+           hover:shadow-2xl transition-all duration-500;
+  }
+
+  .dashboard-gradient-bg {
+    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100;
+  }
+
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  }
+
+  .kpi-card {
+    @apply group relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg 
+           border border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 
+           transition-all duration-500 transform hover:-translate-y-2 hover:scale-105;
+  }
+
+  .progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-2 rounded-full transition-all duration-2000 ease-out shadow-sm;
+  }
+
+  /* Animation delays for staggered effects */
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Admin Portal Specific Enhancements */
+  .admin-portal-bg {
+    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100;
+  }
+
+  .admin-card-enhanced {
+    @apply bg-white/90 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-xl border border-white/20 
+           hover:shadow-2xl transition-all duration-300;
+  }
+
+  .admin-sidebar-item {
+    @apply group flex items-center px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-300;
+  }
+
+  .admin-sidebar-item-active {
+    @apply admin-sidebar-item bg-gradient-to-r from-blue-500 to-indigo-500 text-white 
+           shadow-lg shadow-blue-500/25 transform scale-105;
+  }
+
+  .admin-sidebar-item-inactive {
+    @apply admin-sidebar-item text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 
+           hover:text-gray-900 hover:shadow-md hover:scale-105;
+  }
+
+  .admin-kpi-card {
+    @apply group relative bg-white/90 backdrop-blur-sm rounded-2xl lg:rounded-3xl p-4 lg:p-6 
+           shadow-lg border border-white/20 hover:shadow-xl hover:shadow-blue-500/10 
+           transition-all duration-300 transform hover:-translate-y-1;
+  }
+
+  .admin-progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-1.5 lg:h-2 overflow-hidden;
+  }
+
+  .admin-progress-fill {
+    @apply h-1.5 lg:h-2 rounded-full transition-all duration-2000 ease-out shadow-sm;
+  }
+
+  /* Responsive Text Sizes */
+  .text-responsive-xs {
+    @apply text-xs lg:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm lg:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base lg:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg lg:text-xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl lg:text-2xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  .text-responsive-3xl {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  .text-responsive-4xl {
+    @apply text-4xl lg:text-5xl;
+  }
+
+  /* Responsive Spacing */
+  .space-responsive-sm {
+    @apply space-y-3 lg:space-y-4;
+  }
+
+  .space-responsive-md {
+    @apply space-y-4 lg:space-y-6;
+  }
+
+  .space-responsive-lg {
+    @apply space-y-6 lg:space-y-8;
+  }
+
+  /* Responsive Padding */
+  .p-responsive-sm {
+    @apply p-4 lg:p-6;
+  }
+
+  .p-responsive-md {
+    @apply p-6 lg:p-8;
+  }
+
+  .px-responsive-sm {
+    @apply px-4 lg:px-6;
+  }
+
+  .px-responsive-md {
+    @apply px-6 lg:px-8;
+  }
+
+  .py-responsive-sm {
+    @apply py-4 lg:py-6;
+  }
+
+  .py-responsive-md {
+    @apply py-6 lg:py-8;
+  }
 }

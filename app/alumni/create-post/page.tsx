@@ -1,16 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
-import { Send, Image, Link, Smile, ArrowLeft } from 'lucide-react'
+import { Send, Image, Link, Smile, ArrowLeft, Paperclip, X } from 'lucide-react'
 
 export default function CreatePost() {
-  const { user, addPost } = useStore()
+  const { user, addPost, updateUserStats } = useStore()
   const router = useRouter()
   const [content, setContent] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [selectedAttachment, setSelectedAttachment] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const attachmentInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!user || user.role !== 'alumni') {
@@ -35,11 +40,25 @@ export default function CreatePost() {
         content: content.trim(),
         timestamp: new Date(),
         likes: 0,
-        comments: 0
+        comments: 0,
+        imageUrl: selectedImage ? URL.createObjectURL(selectedImage) : undefined,
+        attachmentUrl: selectedAttachment ? URL.createObjectURL(selectedAttachment) : undefined,
+        attachmentName: selectedAttachment?.name || undefined
       }
 
       addPost(newPost)
+      
+      // Simulate gaining followers when posting (random 1-3 followers)
+      const newFollowers = Math.floor(Math.random() * 3) + 1
+      if (user?.id) {
+        updateUserStats(user.id, {
+          followers: (user.followers || 0) + newFollowers
+        })
+      }
+      
       setContent('')
+      setSelectedImage(null)
+      setSelectedAttachment(null)
       setIsLoading(false)
       router.push('/alumni')
     }, 1000)
@@ -48,6 +67,27 @@ export default function CreatePost() {
   const handleBack = () => {
     router.push('/alumni')
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file)
+    }
+  }
+
+  const handleAttachmentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedAttachment(file)
+    }
+  }
+
+  const addEmoji = (emoji: string) => {
+    setContent(prev => prev + emoji)
+    setShowEmojiPicker(false)
+  }
+
+  const emojis = ['😀', '😂', '😍', '🥰', '😎', '🤔', '👍', '👎', '❤️', '🔥', '💯', '🎉', '🚀', '💡', '⭐', '🎯']
 
   if (!user || user.role !== 'alumni') {
     return null
@@ -87,14 +127,65 @@ export default function CreatePost() {
               </div>
             </div>
 
+            {/* Selected Files Preview */}
+            {(selectedImage || selectedAttachment) && (
+              <div className="p-6 border-b bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    {selectedImage && (
+                      <div className="flex items-center space-x-2">
+                        <Image className="w-5 h-5 text-blue-500" />
+                        <span className="text-sm text-gray-700">{selectedImage.name}</span>
+                      </div>
+                    )}
+                    {selectedAttachment && (
+                      <div className="flex items-center space-x-2">
+                        <Paperclip className="w-5 h-5 text-green-500" />
+                        <span className="text-sm text-gray-700">{selectedAttachment.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedImage(null)
+                      setSelectedAttachment(null)
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Emoji Picker */}
+            {showEmojiPicker && (
+              <div className="p-6 border-b bg-gray-50">
+                <div className="grid grid-cols-8 gap-2">
+                  {emojis.map((emoji, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => addEmoji(emoji)}
+                      className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-lg"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Post Content */}
             <div className="p-6">
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="What's on your mind? Share career insights, experiences, or advice for students..."
-                className="textarea-enhanced h-48"
+                className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white h-48"
                 disabled={isLoading}
+                style={{ color: '#111827' }}
               />
             </div>
 
@@ -102,23 +193,41 @@ export default function CreatePost() {
             <div className="p-6 border-t bg-gray-50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
                   <button
                     type="button"
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                     disabled={isLoading}
                   >
                     <Image className="w-5 h-5" />
                   </button>
+
+                  <input
+                    ref={attachmentInputRef}
+                    type="file"
+                    onChange={handleAttachmentUpload}
+                    className="hidden"
+                  />
                   <button
                     type="button"
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"
+                    onClick={() => attachmentInputRef.current?.click()}
+                    className="p-2 text-gray-500 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors"
                     disabled={isLoading}
                   >
-                    <Link className="w-5 h-5" />
+                    <Paperclip className="w-5 h-5" />
                   </button>
+
                   <button
                     type="button"
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-2 text-gray-500 hover:text-yellow-500 hover:bg-yellow-50 rounded-md transition-colors"
                     disabled={isLoading}
                   >
                     <Smile className="w-5 h-5" />
@@ -130,7 +239,7 @@ export default function CreatePost() {
                   </span>
                   <button
                     type="submit"
-                    disabled={isLoading || !content.trim() || content.length > 500}
+                    disabled={isLoading || (!content.trim() && !selectedImage && !selectedAttachment) || content.length > 500}
                     className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                   >
                     {isLoading ? (
