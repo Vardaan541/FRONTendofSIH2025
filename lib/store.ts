@@ -83,6 +83,82 @@ export interface Chat {
   updatedAt: Date
 }
 
+export interface CareerMilestone {
+  id: string
+  userId: string
+  title: string
+  description: string
+  type: 'promotion' | 'job_change' | 'certification' | 'achievement' | 'education' | 'project' | 'award'
+  date: Date
+  company?: string
+  position?: string
+  skills?: string[]
+  impact?: string
+  evidence?: string // URL to certificate, image, etc.
+}
+
+export interface CareerGoal {
+  id: string
+  userId: string
+  title: string
+  description: string
+  category: 'skill_development' | 'career_advancement' | 'networking' | 'education' | 'leadership' | 'entrepreneurship'
+  targetDate: Date
+  status: 'not_started' | 'in_progress' | 'completed' | 'paused'
+  priority: 'low' | 'medium' | 'high'
+  progress: number // 0-100
+  milestones?: string[] // Array of milestone IDs
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SkillProgress {
+  id: string
+  userId: string
+  skillName: string
+  category: 'technical' | 'soft' | 'leadership' | 'domain'
+  currentLevel: number // 1-5 scale
+  targetLevel: number // 1-5 scale
+  lastUpdated: Date
+  learningResources?: string[]
+  certifications?: string[]
+}
+
+export interface EventRequest {
+  id: string
+  title: string
+  description: string
+  submittedBy: string
+  submittedDate: string
+  status: 'pending' | 'approved' | 'rejected'
+  priority: 'low' | 'medium' | 'high'
+  collegeId: string
+  details: {
+    eventName: string
+    date: string
+    time: string
+    venue: string
+    expectedAttendees: number
+    budget: number
+    type: 'networking' | 'workshop' | 'conference' | 'reunion' | 'social'
+    contactEmail: string
+    contactPhone?: string
+    organizer: string
+  }
+}
+
+export interface CareerProgress {
+  userId: string
+  currentPosition: string
+  currentCompany: string
+  yearsOfExperience: number
+  totalMilestones: number
+  completedGoals: number
+  activeGoals: number
+  skillsCount: number
+  lastUpdated: Date
+}
+
 interface AppState {
   user: User | null
   posts: Post[]
@@ -90,6 +166,11 @@ interface AppState {
   sessionRequests: SessionRequest[]
   chats: Chat[]
   messages: Message[]
+  careerMilestones: CareerMilestone[]
+  careerGoals: CareerGoal[]
+  skillProgress: SkillProgress[]
+  careerProgress: CareerProgress | null
+  eventRequests: EventRequest[]
   setUser: (user: User | null) => void
   addPost: (post: Post) => void
   updatePost: (id: string, updates: Partial<Post>) => void
@@ -105,6 +186,21 @@ interface AppState {
   toggleChatPin: (chatId: string) => void
   toggleChatFavorite: (chatId: string) => void
   updateUserStats: (userId: string, updates: Partial<User>) => void
+  // Career Progress Management
+  addCareerMilestone: (milestone: CareerMilestone) => void
+  updateCareerMilestone: (id: string, updates: Partial<CareerMilestone>) => void
+  deleteCareerMilestone: (id: string) => void
+  addCareerGoal: (goal: CareerGoal) => void
+  updateCareerGoal: (id: string, updates: Partial<CareerGoal>) => void
+  deleteCareerGoal: (id: string) => void
+  addSkillProgress: (skill: SkillProgress) => void
+  updateSkillProgress: (id: string, updates: Partial<SkillProgress>) => void
+  deleteSkillProgress: (id: string) => void
+  updateCareerProgress: (progress: CareerProgress) => void
+  // Event Request Management
+  addEventRequest: (request: EventRequest) => void
+  updateEventRequest: (id: string, updates: Partial<EventRequest>) => void
+  deleteEventRequest: (id: string) => void
 }
 
 // Sample data for demonstration
@@ -237,6 +333,201 @@ const sampleMessages: Message[] = [
   }
 ]
 
+// Sample career progress data
+const sampleCareerMilestones: CareerMilestone[] = [
+  {
+    id: 'milestone-1',
+    userId: 'user1',
+    title: 'Promoted to Senior Software Engineer',
+    description: 'Successfully promoted to Senior Software Engineer role at Google',
+    type: 'promotion',
+    date: new Date('2023-12-01'),
+    company: 'Google',
+    position: 'Senior Software Engineer',
+    skills: ['Leadership', 'System Design', 'Mentoring'],
+    impact: 'Led a team of 5 engineers and improved system performance by 40%'
+  },
+  {
+    id: 'milestone-2',
+    userId: 'user1',
+    title: 'AWS Solutions Architect Certification',
+    description: 'Earned AWS Solutions Architect Professional certification',
+    type: 'certification',
+    date: new Date('2023-10-15'),
+    skills: ['AWS', 'Cloud Architecture', 'DevOps'],
+    evidence: 'https://example.com/certificate.pdf'
+  },
+  {
+    id: 'milestone-3',
+    userId: 'user1',
+    title: 'Joined Google',
+    description: 'Started new role as Software Engineer at Google',
+    type: 'job_change',
+    date: new Date('2022-06-01'),
+    company: 'Google',
+    position: 'Software Engineer'
+  }
+]
+
+const sampleCareerGoals: CareerGoal[] = [
+  {
+    id: 'goal-1',
+    userId: 'user1',
+    title: 'Become a Tech Lead',
+    description: 'Advance to a technical leadership role within the next 2 years',
+    category: 'career_advancement',
+    targetDate: new Date('2025-12-31'),
+    status: 'in_progress',
+    priority: 'high',
+    progress: 60,
+    milestones: ['milestone-1'],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-15')
+  },
+  {
+    id: 'goal-2',
+    userId: 'user1',
+    title: 'Master Machine Learning',
+    description: 'Develop expertise in machine learning and AI technologies',
+    category: 'skill_development',
+    targetDate: new Date('2024-12-31'),
+    status: 'in_progress',
+    priority: 'medium',
+    progress: 30,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-15')
+  },
+  {
+    id: 'goal-3',
+    userId: 'user1',
+    title: 'Build Professional Network',
+    description: 'Connect with 100+ industry professionals and attend 12 networking events',
+    category: 'networking',
+    targetDate: new Date('2024-06-30'),
+    status: 'in_progress',
+    priority: 'medium',
+    progress: 45,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-15')
+  }
+]
+
+const sampleSkillProgress: SkillProgress[] = [
+  {
+    id: 'skill-1',
+    userId: 'user1',
+    skillName: 'React',
+    category: 'technical',
+    currentLevel: 4,
+    targetLevel: 5,
+    lastUpdated: new Date('2024-01-15'),
+    learningResources: ['React Documentation', 'Advanced React Patterns Course'],
+    certifications: ['React Developer Certification']
+  },
+  {
+    id: 'skill-2',
+    userId: 'user1',
+    skillName: 'Leadership',
+    category: 'leadership',
+    currentLevel: 3,
+    targetLevel: 4,
+    lastUpdated: new Date('2024-01-10'),
+    learningResources: ['Leadership in Tech Course', 'Mentoring Best Practices']
+  },
+  {
+    id: 'skill-3',
+    userId: 'user1',
+    skillName: 'System Design',
+    category: 'technical',
+    currentLevel: 4,
+    targetLevel: 5,
+    lastUpdated: new Date('2024-01-12'),
+    learningResources: ['System Design Interview Prep', 'Distributed Systems Course']
+  }
+]
+
+const sampleCareerProgress: CareerProgress = {
+  userId: 'user1',
+  currentPosition: 'Senior Software Engineer',
+  currentCompany: 'Google',
+  yearsOfExperience: 5,
+  totalMilestones: 3,
+  completedGoals: 0,
+  activeGoals: 3,
+  skillsCount: 3,
+  lastUpdated: new Date('2024-01-15')
+}
+
+// Sample event requests data
+const sampleEventRequests: EventRequest[] = [
+  {
+    id: '1',
+    title: 'Tech Talk 2024 - Annual Conference',
+    description: 'Annual technology conference for alumni and students featuring industry leaders and networking opportunities.',
+    submittedBy: 'Sarah Johnson',
+    submittedDate: '2024-01-14T15:45:00Z',
+    status: 'pending',
+    priority: 'high',
+    collegeId: 'EVT-2024-001',
+    details: {
+      eventName: 'Tech Talk 2024',
+      date: '2024-03-15',
+      time: '18:00',
+      venue: 'University Auditorium',
+      expectedAttendees: 200,
+      budget: 15000,
+      type: 'conference',
+      contactEmail: 'sarah.johnson@email.com',
+      contactPhone: '+1 (555) 123-4567',
+      organizer: 'Sarah Johnson'
+    }
+  },
+  {
+    id: '2',
+    title: 'Networking Mixer - Alumni Meetup',
+    description: 'Casual networking event for alumni to connect and share experiences in a relaxed environment.',
+    submittedBy: 'Michael Chen',
+    submittedDate: '2024-01-16T10:30:00Z',
+    status: 'pending',
+    priority: 'medium',
+    collegeId: 'EVT-REQ-20240116',
+    details: {
+      eventName: 'Networking Mixer - Alumni Meetup',
+      date: '2024-04-20',
+      time: '19:00',
+      venue: 'Downtown Conference Center',
+      expectedAttendees: 50,
+      budget: 2500,
+      type: 'networking',
+      contactEmail: 'michael.chen@email.com',
+      contactPhone: '+1 (555) 234-5678',
+      organizer: 'Michael Chen'
+    }
+  },
+  {
+    id: '3',
+    title: 'Data Science Workshop',
+    description: 'Hands-on workshop covering machine learning fundamentals and practical applications.',
+    submittedBy: 'Emily Rodriguez',
+    submittedDate: '2024-01-12T14:15:00Z',
+    status: 'approved',
+    priority: 'medium',
+    collegeId: 'EVT-WS-20240112',
+    details: {
+      eventName: 'Data Science Workshop',
+      date: '2024-02-28',
+      time: '14:00',
+      venue: 'Computer Lab 3',
+      expectedAttendees: 30,
+      budget: 800,
+      type: 'workshop',
+      contactEmail: 'emily.rodriguez@email.com',
+      contactPhone: '+1 (555) 345-6789',
+      organizer: 'Emily Rodriguez'
+    }
+  }
+]
+
 export const useStore = create<AppState>((set) => ({
   user: null,
   posts: [],
@@ -244,6 +535,11 @@ export const useStore = create<AppState>((set) => ({
   sessionRequests: [],
   chats: sampleChats,
   messages: sampleMessages,
+  careerMilestones: sampleCareerMilestones,
+  careerGoals: sampleCareerGoals,
+  skillProgress: sampleSkillProgress,
+  careerProgress: sampleCareerProgress,
+  eventRequests: sampleEventRequests,
   setUser: (user) => set({ user }),
   addPost: (post) => set((state) => ({ posts: [post, ...state.posts] })),
   updatePost: (id, updates) => set((state) => ({
@@ -298,5 +594,52 @@ export const useStore = create<AppState>((set) => ({
   })),
   updateUserStats: (userId, updates) => set((state) => ({
     user: state.user?.id === userId ? { ...state.user, ...updates } : state.user
+  })),
+  // Career Progress Management
+  addCareerMilestone: (milestone) => set((state) => ({ 
+    careerMilestones: [milestone, ...state.careerMilestones] 
+  })),
+  updateCareerMilestone: (id, updates) => set((state) => ({
+    careerMilestones: state.careerMilestones.map(milestone => 
+      milestone.id === id ? { ...milestone, ...updates } : milestone
+    )
+  })),
+  deleteCareerMilestone: (id) => set((state) => ({
+    careerMilestones: state.careerMilestones.filter(milestone => milestone.id !== id)
+  })),
+  addCareerGoal: (goal) => set((state) => ({ 
+    careerGoals: [goal, ...state.careerGoals] 
+  })),
+  updateCareerGoal: (id, updates) => set((state) => ({
+    careerGoals: state.careerGoals.map(goal => 
+      goal.id === id ? { ...goal, ...updates } : goal
+    )
+  })),
+  deleteCareerGoal: (id) => set((state) => ({
+    careerGoals: state.careerGoals.filter(goal => goal.id !== id)
+  })),
+  addSkillProgress: (skill) => set((state) => ({ 
+    skillProgress: [skill, ...state.skillProgress] 
+  })),
+  updateSkillProgress: (id, updates) => set((state) => ({
+    skillProgress: state.skillProgress.map(skill => 
+      skill.id === id ? { ...skill, ...updates } : skill
+    )
+  })),
+  deleteSkillProgress: (id) => set((state) => ({
+    skillProgress: state.skillProgress.filter(skill => skill.id !== id)
+  })),
+  updateCareerProgress: (progress) => set({ careerProgress: progress }),
+  // Event Request Management
+  addEventRequest: (request) => set((state) => ({ 
+    eventRequests: [request, ...state.eventRequests] 
+  })),
+  updateEventRequest: (id, updates) => set((state) => ({
+    eventRequests: state.eventRequests.map(request => 
+      request.id === id ? { ...request, ...updates } : request
+    )
+  })),
+  deleteEventRequest: (id) => set((state) => ({
+    eventRequests: state.eventRequests.filter(request => request.id !== id)
   }))
 }))

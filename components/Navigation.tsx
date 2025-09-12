@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   Plus,
-  MessageCircle
+  MessageCircle,
+  Calendar
 } from 'lucide-react'
 
 interface NavigationProps {

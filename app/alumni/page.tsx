@@ -5,12 +5,25 @@ import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Navigation from '@/components/Navigation'
 import CommentModal from '@/components/CommentModal'
-import { FileText, Trophy, Users, MessageCircle, Heart, Share2, Plus, TrendingUp } from 'lucide-react'
+import { FileText, Trophy, Users, MessageCircle, Heart, Share2, Plus, TrendingUp, Target, Award, Calendar, MapPin, Clock, DollarSign, X } from 'lucide-react'
 
 export default function AlumniDashboard() {
-  const { user, posts, setUser, updatePost, comments } = useStore()
+  const { user, posts, setUser, updatePost, comments, careerMilestones, careerGoals, skillProgress } = useStore()
   const router = useRouter()
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [showEventRequestModal, setShowEventRequestModal] = useState(false)
+  const [eventRequestForm, setEventRequestForm] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    venue: '',
+    expectedAttendees: '',
+    budget: '',
+    type: 'networking',
+    contactEmail: user?.email || '',
+    contactPhone: ''
+  })
   const [leaderboard, setLeaderboard] = useState([
     { id: '1', name: 'Sarah Johnson', followers: 250, position: 'Senior Software Engineer', company: 'Google' },
     { id: '2', name: 'Michael Chen', followers: 200, position: 'Product Manager', company: 'Microsoft' },
@@ -95,6 +108,63 @@ export default function AlumniDashboard() {
 
   const handleCloseCommentModal = () => {
     setSelectedPostId(null)
+  }
+
+  const handleEventRequestSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Create event request object
+    const eventRequest = {
+      id: Date.now().toString(),
+      type: 'event',
+      title: `${eventRequestForm.title} - Event Request`,
+      description: eventRequestForm.description,
+      submittedBy: user?.name || 'Unknown',
+      submittedDate: new Date().toISOString(),
+      status: 'pending',
+      priority: 'medium',
+      collegeId: `EVT-REQ-${Date.now()}`,
+      details: {
+        eventName: eventRequestForm.title,
+        date: eventRequestForm.date,
+        time: eventRequestForm.time,
+        venue: eventRequestForm.venue,
+        expectedAttendees: parseInt(eventRequestForm.expectedAttendees) || 0,
+        budget: parseFloat(eventRequestForm.budget) || 0,
+        type: eventRequestForm.type,
+        contactEmail: eventRequestForm.contactEmail,
+        contactPhone: eventRequestForm.contactPhone,
+        organizer: user?.name || 'Unknown'
+      }
+    }
+
+    // In a real app, this would be sent to the backend
+    console.log('Event request submitted:', eventRequest)
+    
+    // Show success message
+    alert('Event request submitted successfully! It will be reviewed by the admin team.')
+    
+    // Reset form and close modal
+    setEventRequestForm({
+      title: '',
+      description: '',
+      date: '',
+      time: '',
+      venue: '',
+      expectedAttendees: '',
+      budget: '',
+      type: 'networking',
+      contactEmail: user?.email || '',
+      contactPhone: ''
+    })
+    setShowEventRequestModal(false)
+  }
+
+  const handleEventRequestFormChange = (field: string, value: string) => {
+    setEventRequestForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   return (
@@ -235,6 +305,20 @@ export default function AlumniDashboard() {
                 >
                   Create New Post
                 </button>
+                <button 
+                  onClick={() => router.push('/alumni/career-progress')}
+                  className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <Target className="w-4 h-4" />
+                  <span>Career Progress</span>
+                </button>
+                <button 
+                  onClick={() => setShowEventRequestModal(true)}
+                  className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Request Event</span>
+                </button>
               </div>
             </div>
 
@@ -273,6 +357,36 @@ export default function AlumniDashboard() {
                   </span>
                 </div>
               </div>
+            </div>
+
+            {/* Career Progress Summary */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Target className="w-5 h-5 text-purple-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Career Progress</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Milestones</span>
+                  <span className="font-medium text-gray-900">{careerMilestones.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Active Goals</span>
+                  <span className="font-medium text-gray-900">
+                    {careerGoals.filter(goal => goal.status === 'in_progress').length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Skills Tracked</span>
+                  <span className="font-medium text-gray-900">{skillProgress.length}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => router.push('/alumni/career-progress')}
+                className="w-full mt-4 text-purple-600 hover:text-purple-700 text-sm font-medium"
+              >
+                View Full Progress →
+              </button>
             </div>
 
             {/* Leaderboard */}
@@ -320,6 +434,172 @@ export default function AlumniDashboard() {
         isOpen={selectedPostId !== null}
         onClose={handleCloseCommentModal}
       />
+
+      {/* Event Request Modal */}
+      {showEventRequestModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-2xl rounded-2xl bg-white border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Request New Event</h3>
+              <button
+                onClick={() => setShowEventRequestModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all duration-200"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEventRequestSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Event Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={eventRequestForm.title}
+                    onChange={(e) => handleEventRequestFormChange('title', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Enter event title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Event Type *</label>
+                  <select
+                    required
+                    value={eventRequestForm.type}
+                    onChange={(e) => handleEventRequestFormChange('type', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900"
+                  >
+                    <option value="networking">Networking</option>
+                    <option value="workshop">Workshop</option>
+                    <option value="conference">Conference</option>
+                    <option value="reunion">Reunion</option>
+                    <option value="social">Social</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Event Description *</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={eventRequestForm.description}
+                  onChange={(e) => handleEventRequestFormChange('description', e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                  placeholder="Describe the event, its purpose, and what attendees can expect"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Event Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={eventRequestForm.date}
+                    onChange={(e) => handleEventRequestFormChange('date', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Event Time *</label>
+                  <input
+                    type="time"
+                    required
+                    value={eventRequestForm.time}
+                    onChange={(e) => handleEventRequestFormChange('time', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Venue *</label>
+                <input
+                  type="text"
+                  required
+                  value={eventRequestForm.venue}
+                  onChange={(e) => handleEventRequestFormChange('venue', e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                  placeholder="Enter venue details"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Expected Attendees</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={eventRequestForm.expectedAttendees}
+                    onChange={(e) => handleEventRequestFormChange('expectedAttendees', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Estimated number of attendees"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Budget (if applicable)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={eventRequestForm.budget}
+                    onChange={(e) => handleEventRequestFormChange('budget', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Estimated budget"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={eventRequestForm.contactEmail}
+                    onChange={(e) => handleEventRequestFormChange('contactEmail', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Your email address"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                  <input
+                    type="tel"
+                    value={eventRequestForm.contactPhone}
+                    onChange={(e) => handleEventRequestFormChange('contactPhone', e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Your phone number"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+                <div className="text-sm text-gray-500">
+                  * Required fields. Your request will be reviewed by the admin team.
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEventRequestModal(false)}
+                    className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Submit Request
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
