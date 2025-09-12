@@ -65,8 +65,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [router])
 
   const handleLogout = () => {
+    setUserMenuOpen(false)
     clearAdminUser()
-    router.push('/admin/login')
+    // Add a small delay to ensure the menu closes before redirect
+    setTimeout(() => {
+      router.push('/admin/login')
+    }, 100)
   }
 
   const navigation = [
