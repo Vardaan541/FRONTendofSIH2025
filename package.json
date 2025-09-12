@@ -11,6 +11,8 @@
     "test-payment": "node scripts/test-payment.js"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
     "autoprefixer": "^10.4.16",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.292.0",
